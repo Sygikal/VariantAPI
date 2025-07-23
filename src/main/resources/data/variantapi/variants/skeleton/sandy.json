@@ -1,0 +1,11 @@
+{
+    "entity": "minecraft:skeleton",
+    "texture": "variantapi:textures/sandy.png",
+    "conditions": [
+        {
+            "type": "variantapi:predicate_condition",
+            "predicate": "variantapi:test"
+        }
+    ],
+    "weight": 5
+}

@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "package": "dev.sygii.variantapi.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "plugin": "dev.sygii.variantapi.mixin.VariantAPIMixinPlugin",
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "client": [
+    "entity.LivingEntityRendererMixin",
+    "features.EyesFeatureRendererMixin",
+    "features.SheepWoolFeatureRendererMixin"
+  ],
+  "mixins": [
+    "compat.MobDifficultyMixin",
+    "entity.EntityMixin",
+    "entity.MobEntityMixin"
+  ]
+}

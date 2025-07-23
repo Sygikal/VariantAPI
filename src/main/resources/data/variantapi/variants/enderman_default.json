@@ -1,0 +1,6 @@
+{
+    "entity": "minecraft:enderman",
+    "texture": "minecraft:textures/entity/enderman/enderman.png",
+    "eye_texture": "minecraft:textures/entity/enderman/enderman_eyes.png",
+    "weight": 5
+}

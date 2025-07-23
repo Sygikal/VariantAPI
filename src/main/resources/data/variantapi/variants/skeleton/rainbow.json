@@ -1,0 +1,12 @@
+{
+    "overlay": true,
+    "entity": "minecraft:skeleton",
+    "texture": "variantapi:textures/skeleton_rainbow.png",
+    "conditions": [
+        {
+            "type": "variantapi:predicate_condition",
+            "predicate": "variantapi:test"
+        }
+    ],
+    "weight": 5
+}
