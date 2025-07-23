@@ -1,15 +1,11 @@
 package dev.sygii.variantapi.mixin.entity;
 
-import com.llamalad7.mixinextras.sugar.Local;
 import dev.sygii.variantapi.VariantAPI;
 import dev.sygii.variantapi.acess.EntityAccess;
 import dev.sygii.variantapi.variants.Variant;
-import dev.sygii.variantapi.variants.feature.CustomEyesFeature;
 import dev.sygii.variantapi.variants.feature.CustomLightingFeature;
 import dev.sygii.variantapi.variants.feature.CustomRenderLayerFeature;
 import dev.sygii.variantapi.variants.feature.CustomShearedWoolFeature;
-import net.minecraft.client.model.Model;
-import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -27,7 +23,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Debug(export=true)
 @Mixin(LivingEntityRenderer.class)
@@ -42,15 +37,6 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 		if (!variant.id().equals(VariantAPI.getDefaultVariant().id())) {
 			return variant.texture();
 		}
-
-		/*if (skeletonEntity.hasCustomName()) {
-			MobVariant variant = Variants.getVariantFromNametag(EntityType.SKELETON, skeletonEntity.getName().getString());
-			if (variant != null) {
-				Identifier identifier = variant.getIdentifier();
-				ci.setReturnValue(Identifier.of(identifier.getNamespace(), "textures/entity/skeleton/" + identifier.getPath() + ".png"));
-			}
-		}
-		return DEFAULT;*/
 		return instance.getTexture(entity);
 	}
 
@@ -82,8 +68,6 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 				light = ((CustomLightingFeature)k.getFeature(CustomLightingFeature.ID)).getLight();
 			}
 			this.model.render(matrixStack, vertexConsumer, light, ((LivingEntityRenderer)(Object)this).getOverlay(livingEntity, ((LivingEntityRenderer)(Object)this).getAnimationCounter(livingEntity, g)), 1.0F, 1.0F, 1.0F, 1.0F);
-
-			//((Model) this.getContextModel()).render(matrices, vertexConsumer, 0xF00000, OverlayTexture.DEFAULT_UV, 1.0f, 1.0f, 1.0f, 1.0f);
 		});
 	}
 }

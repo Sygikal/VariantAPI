@@ -101,15 +101,11 @@ public class VariantAPI implements ModInitializer {
 		conditionFeatures.put(CustomWoolFeature.ID, data -> new CustomWoolFeature(Identifier.tryParse(data.get("texture").getAsString())));
 		conditionFeatures.put(CustomShearedWoolFeature.ID, data -> new CustomShearedWoolFeature(Identifier.tryParse(data.get("texture").getAsString())));
 
-
 		featureDeserializers.put(CustomEyesFeature.ID, CustomEyesFeature::deserialize);
 		featureDeserializers.put(CustomLightingFeature.ID, CustomLightingFeature::deserialize);
 		featureDeserializers.put(CustomRenderLayerFeature.ID, CustomRenderLayerFeature::deserialize);
 		featureDeserializers.put(CustomWoolFeature.ID, CustomWoolFeature::deserialize);
 		featureDeserializers.put(CustomShearedWoolFeature.ID, CustomShearedWoolFeature::deserialize);
-
-
-
 
 		/*ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register(VariantAPI.id("sync_variants"), (player, joined) -> {
 			ServerPlayNetworking.send(player, new S2CResetVariants());
@@ -169,10 +165,6 @@ public class VariantAPI implements ModInitializer {
 			sorted.add(variant);
 		}
 
-		// Split the random to ensure no off-thread access of ThreadLocalRandom occurs
-		// This fixes issues with Distant Horizons and C2ME
-		//var random = new CheckedRandom(randomSeed);
-		// Handle modifiers
 		Iterator<Variant> i = sorted.iterator();
 		Variant variant;
 		while (i.hasNext()) {
@@ -184,59 +176,7 @@ public class VariantAPI implements ModInitializer {
 					continue;
 				}
 			}
-
-			// Discard if not in spawn biome
-			/*if (spawnBiome != null && variant.hasSpawnableBiomeModifier()) {
-				if (!variant.isInSpawnBiome(spawnBiome)) {
-					i.remove();
-					continue;
-				}
-			}*/
-
-			// Discard if special breeding result (handled later)
-			/*if (variant.hasBreedingResultModifier()) {
-				i.remove();
-				continue;
-			}*/
-
-			// Discard if variant is discardable
-			/*if (variant.shouldDiscard(random)) {
-				i.remove();
-				continue;
-			}*/
-
-			// Discord if variant has nametag override
-			// Note: they shouldn't be in this pool in the first place, but better safe than sorry
-			/*if (variant.isNametagOverride()) {
-				i.remove();
-				continue;
-			}*/
 		}
-
-		// Create weighted bag from variants
-		//VariantBag bag = new VariantBag(mob, variants);
-
-		// If we've been provided 2 parents
-		/*if (breedingResultData != null) {
-			// Collect all specialized breeding combination results
-			List<MobVariant> possibleVariants = new ArrayList<>();
-			for (MobVariant v : getVariants(mob)) {
-				if (v.hasBreedingResultModifier() && v.canBreed(breedingResultData.parent1(), breedingResultData.parent2()) && v.shouldBreed(random)) {
-					possibleVariants.add(v);
-				}
-			}
-
-			// If there are no specialized results, handle generic breeding case
-			if (possibleVariants.isEmpty()) {
-				if (random.nextDouble() >= VariantSettings.getChildRandomVariantChance()) {
-					return random.nextBoolean() ? breedingResultData.parent1() : breedingResultData.parent2();
-				}
-			} else { // If there are specialized results, switch to that pool
-				bag = new VariantBag(mob, possibleVariants);
-			}
-		}*/
-
-		//return bag.getRandomEntry(random);
 		//testLootCondition(context.getSource(), IdentifierArgumentType.getPredicateArgument(context, "predicate"))
 		return sorted;
 	}

@@ -54,14 +54,5 @@ public class VariantOverlayFeatureRenderer<T extends Entity, M extends EntityMod
                 }
             }
         }*/
-        /*NbtCompound nbt = new NbtCompound();
-        entity.writeCustomDataToNbt(nbt);
-
-        if (nbt.contains(MoreMobVariants.MUDDY_NBT_KEY)) {
-            if (nbt.getBoolean(MoreMobVariants.MUDDY_NBT_KEY)) {
-                VertexConsumer vertexConsumer = vertexConsumers.getBuffer(this.getMudTexture());
-                ((Model)this.getContextModel()).render(matrices, vertexConsumer, 0xF00000, OverlayTexture.DEFAULT_UV, 1.0f, 1.0f, 1.0f, 1.0f);
-            }
-        }*/
     }
 }
