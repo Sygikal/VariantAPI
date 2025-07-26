@@ -4,10 +4,7 @@ import dev.sygii.variantapi.VariantAPI;
 import dev.sygii.variantapi.acess.EntityAccess;
 import dev.sygii.variantapi.mixin.access.QuadrupedEntityModelAccessor;
 import dev.sygii.variantapi.variants.Variant;
-import dev.sygii.variantapi.variants.feature.CustomLightingFeature;
-import dev.sygii.variantapi.variants.feature.CustomRenderLayerFeature;
-import dev.sygii.variantapi.variants.feature.CustomShearedWoolFeature;
-import dev.sygii.variantapi.variants.feature.HornsFeature;
+import dev.sygii.variantapi.variants.feature.*;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
@@ -19,6 +16,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.SheepEntity;
+import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,9 +38,15 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 
 	@Redirect(method = "getRenderLayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;getTexture(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/Identifier;"))
 	private Identifier init(LivingEntityRenderer instance, Entity entity) {
-
 		Variant variant = ((EntityAccess)entity).getVariant();
 		if (!variant.id().equals(VariantAPI.getDefaultVariant().id())) {
+			if (entity instanceof WolfEntity wolfEntity && variant.getFeatures().containsKey(WolfTexturesFeature.ID)) {
+				if (wolfEntity.isTamed()) {
+					return ((WolfTexturesFeature) variant.getFeature(WolfTexturesFeature.ID)).getTame();
+				} else {
+					return wolfEntity.hasAngerTime() ? ((WolfTexturesFeature) variant.getFeature(WolfTexturesFeature.ID)).getAngry() : variant.texture();
+				}
+			}
 			return variant.texture();
 		}
 		return instance.getTexture(entity);
@@ -68,12 +72,13 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 					horns.copyTransform(sheepHead);
 
 					RenderLayer HORN = RenderLayer.getEntityCutoutNoCull(((HornsFeature) variant.getFeature(HornsFeature.ID)).getTexture());
+					float[] colors = ((HornsFeature) variant.getFeature(HornsFeature.ID)).getColors();
 
 					if (sheepEntity.isBaby()) {
 						matrixStack.push();
 						matrixStack.translate(0.0f, 0.5f, 0.25f);
 					}
-					horns.render(matrixStack, vertexConsumerProvider.getBuffer(HORN), i, ((LivingEntityRenderer)(Object)this).getOverlay(livingEntity, ((LivingEntityRenderer)(Object)this).getAnimationCounter(livingEntity, g)));
+					horns.render(matrixStack, vertexConsumerProvider.getBuffer(HORN), i, ((LivingEntityRenderer)(Object)this).getOverlay(livingEntity, ((LivingEntityRenderer)(Object)this).getAnimationCounter(livingEntity, g)), colors[0], colors[1], colors[2], 1.0f);
 					if (sheepEntity.isBaby()) {
 						matrixStack.pop();
 					}
