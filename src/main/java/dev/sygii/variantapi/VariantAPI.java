@@ -8,10 +8,7 @@ import dev.sygii.variantapi.network.packet.S2CRespondVariantPacket;
 import dev.sygii.variantapi.variants.Variant;
 import dev.sygii.variantapi.variants.VariantCondition;
 import dev.sygii.variantapi.variants.VariantFeature;
-import dev.sygii.variantapi.variants.condition.BreedingCondition;
-import dev.sygii.variantapi.variants.condition.L2HostilityLevelCondition;
-import dev.sygii.variantapi.variants.condition.MoonPhaseCondition;
-import dev.sygii.variantapi.variants.condition.PredicateCondition;
+import dev.sygii.variantapi.variants.condition.*;
 import dev.sygii.variantapi.variants.feature.*;
 import net.fabricmc.api.ModInitializer;
 
@@ -29,7 +26,9 @@ import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
@@ -58,7 +57,10 @@ public class VariantAPI implements ModInitializer {
 	public static final Map<Identifier, VariantCondition> conditionRegistry = new HashMap<>();
 
 	public static final Map<EntityType<?>, ArrayList<Variant>> variantMap = new HashMap<>();
+	public static final Map<EntityType<?>, Map<String, Variant>> entityToCustomNameToVariantMap = new HashMap<>();
 	public static final Map<EntityType<?>, ArrayList<Variant>> variantOverlayMap = new HashMap<>();
+	public static final Map<EntityType<?>, Map<String, ArrayList<Variant>>> entityToCustomNameToVariantOverlayMap = new HashMap<>();
+
 
 	public static final Map<EntityType<?>, Identifier> entityToId = new HashMap<>();
 
@@ -99,13 +101,18 @@ public class VariantAPI implements ModInitializer {
 		conditionCreators.put(PredicateCondition.ID, data -> new PredicateCondition(Identifier.tryParse(data.get("predicate").getAsString())));
 		conditionCreators.put(MoonPhaseCondition.ID, data -> new MoonPhaseCondition(data.get("size").getAsInt()));
 		conditionCreators.put(BreedingCondition.ID, data -> new BreedingCondition(Identifier.tryParse(data.get("father").getAsString()), Identifier.tryParse(data.get("mother").getAsString())));
+		conditionCreators.put(NameCondition.ID, data -> new NameCondition(data.get("name").getAsString()));
+		conditionCreators.put(BiomeCondition.ID, data -> new BiomeCondition(data.get("biome").getAsString()));
+		conditionCreators.put(AnyOfCondition.ID, data -> new AnyOfCondition(data.get("conditions").getAsJsonArray()));
+
 
 		featureCreators.put(CustomEyesFeature.ID, data -> new CustomEyesFeature(Identifier.tryParse(data.get("texture").getAsString())));
 		featureCreators.put(CustomLightingFeature.ID, data -> new CustomLightingFeature(data.get("light").getAsInt()));
 		featureCreators.put(CustomRenderLayerFeature.ID, data -> new CustomRenderLayerFeature(CustomRenderLayerFeature.RenderLayers.valueOf(data.get("layer").getAsString())));
 		featureCreators.put(CustomWoolFeature.ID, data -> new CustomWoolFeature(Identifier.tryParse(data.get("texture").getAsString())));
 		featureCreators.put(CustomShearedWoolFeature.ID, data -> new CustomShearedWoolFeature(Identifier.tryParse(data.get("texture").getAsString())));
-		featureCreators.put(HornsFeature.ID, data -> new HornsFeature(Identifier.tryParse(data.get("texture").getAsString())));
+		featureCreators.put(HornsFeature.ID, data -> new HornsFeature(Identifier.tryParse(data.get("texture").getAsString()), data.has("color") ? data.get("color").getAsInt() : -1));
+		featureCreators.put(WolfTexturesFeature.ID, data -> new WolfTexturesFeature(Identifier.tryParse(data.get("tame").getAsString()), Identifier.tryParse(data.get("angry").getAsString())));
 
 		featureDeserializers.put(CustomEyesFeature.ID, CustomEyesFeature::deserialize);
 		featureDeserializers.put(CustomLightingFeature.ID, CustomLightingFeature::deserialize);
@@ -113,6 +120,7 @@ public class VariantAPI implements ModInitializer {
 		featureDeserializers.put(CustomWoolFeature.ID, CustomWoolFeature::deserialize);
 		featureDeserializers.put(CustomShearedWoolFeature.ID, CustomShearedWoolFeature::deserialize);
 		featureDeserializers.put(HornsFeature.ID, HornsFeature::deserialize);
+		featureDeserializers.put(WolfTexturesFeature.ID, WolfTexturesFeature::deserialize);
 
 
 		/*ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register(VariantAPI.id("sync_variants"), (player, joined) -> {
