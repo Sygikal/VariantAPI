@@ -1,4 +1,4 @@
-package dev.sygii.variantapi.mixin.entity;
+package dev.sygii.variantapi.mixin.item;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
