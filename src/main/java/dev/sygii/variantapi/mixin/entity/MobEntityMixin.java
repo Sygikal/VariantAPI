@@ -72,8 +72,8 @@ public abstract class MobEntityMixin {
 
 	@Inject(method = "initialize", at = @At("RETURN"))
 	protected void onInitialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt, CallbackInfoReturnable<EntityData> ci) {
-		((EntityAccess)entity).setVariant(VariantAPI.getRandomVariant(entity, entity.getType(), entityNbt, world.toServerWorld(), entity.getRandom().nextLong(), world.getBiome(entity.getBlockPos()), world.getMoonSize()));
-		((EntityAccess)entity).setVariantOverlays(VariantAPI.getOverlays(entity, entity.getType(), entityNbt, world.toServerWorld(), entity.getRandom().nextLong(), world.getBiome(entity.getBlockPos()), world.getMoonSize()));
+		((EntityAccess)entity).setVariant(VariantAPI.getRandomVariant(entity, entity.getType()));
+		((EntityAccess)entity).setVariantOverlays(VariantAPI.getOverlays(entity, entity.getType()));
 	}
 
 	//THIS IS CALLED ON BOTH CLIENT AND SERVER
