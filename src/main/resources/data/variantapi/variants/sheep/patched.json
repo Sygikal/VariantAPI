@@ -2,6 +2,14 @@
     "entity": "minecraft:sheep",
     "texture": "variantapi:textures/entity/sheep/patched.png",
     "weight": 5,
+    "conditions": [
+        {
+            "type": "variantapi:breeding_condition",
+            "father": "variantapi:sheep/fuzzy",
+            "mother": "variantapi:sheep/rocky",
+            "exclusive": true
+        }
+    ],
     "features": [
         {
             "type": "variantapi:custom_wool_feature",
@@ -10,6 +18,10 @@
         {
             "type": "variantapi:custom_sheared_wool_feature",
             "texture": "variantapi:textures/entity/sheep/overlay/patched.png"
+        },
+        {
+            "type": "variantapi:horns_feature",
+            "texture": "variantapi:textures/entity/sheep/horn/horns_beige.png"
         }
     ]
 }
