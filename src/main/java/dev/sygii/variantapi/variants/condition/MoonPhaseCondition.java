@@ -23,7 +23,7 @@ public class MoonPhaseCondition extends VariantCondition {
 
     @Override
     public boolean condition(MobEntity entity) {
-         if (!(entity.getWorld().getMoonSize() > size)) {
+        if (!(entity.getWorld().getMoonSize() > size)) {
             return true;
         }
         return false;
