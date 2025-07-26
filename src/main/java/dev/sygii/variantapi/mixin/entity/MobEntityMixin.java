@@ -3,11 +3,9 @@ package dev.sygii.variantapi.mixin.entity;
 import dev.sygii.variantapi.VariantAPI;
 import dev.sygii.variantapi.acess.EntityAccess;
 import dev.sygii.variantapi.variants.Variant;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.EntityData;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.mob.SkeletonEntity;
 import net.minecraft.nbt.*;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.LocalDifficulty;
@@ -64,9 +62,7 @@ public abstract class MobEntityMixin {
 			/*VariantAPI.getOverlays("empty", entity, entity.getType(), nbt, entity.getWorld(), entity.getRandom().nextLong(), entity.getWorld().getBiome(entity.getBlockPos()), entity.getWorld().getMoonSize()).forEach(k ->  {
 				((EntityAccess)entity).addVariantOverlay(k);
 			});/
-		}
-
-		VariantAPI.sendBasicRequest(entity, ((EntityAccess)entity).getVariant(),  ((EntityAccess)entity).getVariantOverlays());*/
+		}*/
 		VariantAPI.syncVariants(entity);
 	}
 
