@@ -61,8 +61,13 @@ public class VariantLoader implements SimpleSynchronousResourceReloadListener {
                     if (data.has("conditions")) {
                         for (JsonElement elem : data.getAsJsonArray("conditions")) {
                             Identifier conditionType = Identifier.tryParse(elem.getAsJsonObject().get("type").getAsString());
+                            boolean exclusive = false;
+                            if (elem.getAsJsonObject().has("exclusive")) {
+                                exclusive = elem.getAsJsonObject().get("exclusive").getAsBoolean();
+                            }
 
                             VariantCondition condition = VariantAPI.createCondition(conditionType, elem.getAsJsonObject());
+                            condition.setExclusive(exclusive);
                             variant.addCondition(condition);
                         }
                     }
