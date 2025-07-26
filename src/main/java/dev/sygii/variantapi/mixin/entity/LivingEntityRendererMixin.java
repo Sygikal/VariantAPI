@@ -2,15 +2,19 @@ package dev.sygii.variantapi.mixin.entity;
 
 import dev.sygii.variantapi.VariantAPI;
 import dev.sygii.variantapi.acess.EntityAccess;
+import dev.sygii.variantapi.mixin.access.QuadrupedEntityModelAccessor;
 import dev.sygii.variantapi.variants.Variant;
 import dev.sygii.variantapi.variants.feature.CustomLightingFeature;
 import dev.sygii.variantapi.variants.feature.CustomRenderLayerFeature;
 import dev.sygii.variantapi.variants.feature.CustomShearedWoolFeature;
+import dev.sygii.variantapi.variants.feature.HornsFeature;
+import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.model.EntityModel;
+import net.minecraft.client.render.entity.model.EntityModelPartNames;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -19,6 +23,7 @@ import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -29,6 +34,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extends EntityModel<T>> {
 	@Shadow
 	protected M model;
+
+	@Unique
+	private final ModelPart horns = getTexturedModelData().createModel();
 
 	@Redirect(method = "getRenderLayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;getTexture(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/Identifier;"))
 	private Identifier init(LivingEntityRenderer instance, Entity entity) {
@@ -54,12 +62,65 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 					this.model.render(matrixStack, vertexConsumer, i, ((LivingEntityRenderer)(Object)this).getOverlay(livingEntity, ((LivingEntityRenderer)(Object)this).getAnimationCounter(livingEntity, g)), hs[0], hs[1], hs[2], 1.0f);
 					//matrixStack.pop();
 				}
+				if (variant.getFeatures().containsKey(HornsFeature.ID)) {
+					matrixStack.push();
+					ModelPart sheepHead = ((QuadrupedEntityModelAccessor)this.model).getHead();
+					horns.copyTransform(sheepHead);
+
+					RenderLayer HORN = RenderLayer.getEntityCutoutNoCull(((HornsFeature) variant.getFeature(HornsFeature.ID)).getTexture());
+
+					if (sheepEntity.isBaby()) {
+						matrixStack.push();
+						matrixStack.translate(0.0f, 0.5f, 0.25f);
+					}
+					horns.render(matrixStack, vertexConsumerProvider.getBuffer(HORN), i, ((LivingEntityRenderer)(Object)this).getOverlay(livingEntity, ((LivingEntityRenderer)(Object)this).getAnimationCounter(livingEntity, g)));
+					if (sheepEntity.isBaby()) {
+						matrixStack.pop();
+					}
+					/*if (sheepEntity.isBaby()) {
+						matrixStack.push();
+						matrixStack.translate(0.0f, 0.5f, 0.25f);
+
+						if (hornColour.equalsIgnoreCase("brown")) {
+							horns.render(matrices, vertexConsumers.getBuffer(HORNS_BROWN), light, OverlayTexture.DEFAULT_UV);
+						} else if (hornColour.equalsIgnoreCase("gray")) {
+							horns.render(matrices, vertexConsumers.getBuffer(HORNS_GRAY), light, OverlayTexture.DEFAULT_UV);
+						} else if (hornColour.equalsIgnoreCase("black")) {
+							horns.render(matrices, vertexConsumers.getBuffer(HORNS_BLACK), light, OverlayTexture.DEFAULT_UV);
+						} else if (hornColour.equalsIgnoreCase("beige")) {
+							horns.render(matrices, vertexConsumers.getBuffer(HORNS_BEIGE), light, OverlayTexture.DEFAULT_UV);
+						}
+
+						matrixStack.pop();
+					} else {
+						if (hornColour.equalsIgnoreCase("brown")) {
+							horns.render(matrices, vertexConsumers.getBuffer(HORNS_BROWN), light, OverlayTexture.DEFAULT_UV);
+						} else if (hornColour.equalsIgnoreCase("gray")) {
+							horns.render(matrices, vertexConsumers.getBuffer(HORNS_GRAY), light, OverlayTexture.DEFAULT_UV);
+						} else if (hornColour.equalsIgnoreCase("black")) {
+							horns.render(matrices, vertexConsumers.getBuffer(HORNS_BLACK), light, OverlayTexture.DEFAULT_UV);
+						} else if (hornColour.equalsIgnoreCase("beige")) {
+							horns.render(matrices, vertexConsumers.getBuffer(HORNS_BEIGE), light, OverlayTexture.DEFAULT_UV);
+						}
+					}*/
+					matrixStack.pop();
+				}
 			}
 		}
 		((EntityAccess)livingEntity).getVariantOverlays().forEach(k -> {
 			RenderLayer layer = RenderLayer.getEntityCutoutNoCull(k.texture());
 			if (k.getFeatures().containsKey(CustomRenderLayerFeature.ID)) {
-				layer = ((CustomRenderLayerFeature)k.getFeature(CustomRenderLayerFeature.ID)).getLayer(k.texture());
+				switch (((CustomRenderLayerFeature)k.getFeature(CustomRenderLayerFeature.ID)).getLayer()) {
+					case ENTITY_CUTOUT_NO_CULL:
+						layer = RenderLayer.getEntityCutoutNoCull(k.texture());
+						break;
+					case ENTITY_ALPHA:
+						layer = RenderLayer.getEntityAlpha(k.texture());
+						break;
+					case EYES:
+						layer = RenderLayer.getEyes(k.texture());
+						break;
+				}
 			}
 			VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(layer);
 
@@ -69,5 +130,20 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 			}
 			this.model.render(matrixStack, vertexConsumer, light, ((LivingEntityRenderer)(Object)this).getOverlay(livingEntity, ((LivingEntityRenderer)(Object)this).getAnimationCounter(livingEntity, g)), 1.0F, 1.0F, 1.0F, 1.0F);
 		});
+	}
+
+	@Unique
+	private static TexturedModelData getTexturedModelData() {
+		ModelData modelData = new ModelData();
+		ModelPartData modelPartData = modelData.getRoot();
+
+		modelPartData.addChild(EntityModelPartNames.HEAD,
+				ModelPartBuilder.create()
+						.uv(0, 0).cuboid(3.0f, -3.5f, -3.0f, 4.0f, 7.0f, 6.0f)
+						.uv(0, 13).cuboid(3.0f, 0.5f, -6.0f, 4.0f, 3.0f, 3.0f)
+						.uv(0, 19).cuboid(-7.0f, -3.5f, -3.0f, 4.0f, 7.0f, 6.0f)
+						.uv(14, 13).cuboid(-7.0f, 0.5f, -6.0f, 4.0f, 3.0f, 3.0f),
+				ModelTransform.pivot(0.0f, -1.5f, -2.1f));
+		return TexturedModelData.of(modelData, 32, 32);
 	}
 }
