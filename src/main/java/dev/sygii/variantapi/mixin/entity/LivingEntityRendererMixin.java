@@ -77,32 +77,6 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 					if (sheepEntity.isBaby()) {
 						matrixStack.pop();
 					}
-					/*if (sheepEntity.isBaby()) {
-						matrixStack.push();
-						matrixStack.translate(0.0f, 0.5f, 0.25f);
-
-						if (hornColour.equalsIgnoreCase("brown")) {
-							horns.render(matrices, vertexConsumers.getBuffer(HORNS_BROWN), light, OverlayTexture.DEFAULT_UV);
-						} else if (hornColour.equalsIgnoreCase("gray")) {
-							horns.render(matrices, vertexConsumers.getBuffer(HORNS_GRAY), light, OverlayTexture.DEFAULT_UV);
-						} else if (hornColour.equalsIgnoreCase("black")) {
-							horns.render(matrices, vertexConsumers.getBuffer(HORNS_BLACK), light, OverlayTexture.DEFAULT_UV);
-						} else if (hornColour.equalsIgnoreCase("beige")) {
-							horns.render(matrices, vertexConsumers.getBuffer(HORNS_BEIGE), light, OverlayTexture.DEFAULT_UV);
-						}
-
-						matrixStack.pop();
-					} else {
-						if (hornColour.equalsIgnoreCase("brown")) {
-							horns.render(matrices, vertexConsumers.getBuffer(HORNS_BROWN), light, OverlayTexture.DEFAULT_UV);
-						} else if (hornColour.equalsIgnoreCase("gray")) {
-							horns.render(matrices, vertexConsumers.getBuffer(HORNS_GRAY), light, OverlayTexture.DEFAULT_UV);
-						} else if (hornColour.equalsIgnoreCase("black")) {
-							horns.render(matrices, vertexConsumers.getBuffer(HORNS_BLACK), light, OverlayTexture.DEFAULT_UV);
-						} else if (hornColour.equalsIgnoreCase("beige")) {
-							horns.render(matrices, vertexConsumers.getBuffer(HORNS_BEIGE), light, OverlayTexture.DEFAULT_UV);
-						}
-					}*/
 					matrixStack.pop();
 				}
 			}
