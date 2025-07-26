@@ -1,0 +1,19 @@
+{
+    "entity": "minecraft:sheep",
+    "texture": "variantapi:textures/entity/sheep/fuzzy.png",
+    "weight": 5,
+    "features": [
+        {
+            "type": "variantapi:custom_wool_feature",
+            "texture": "variantapi:textures/entity/sheep/wool/fuzzy.png"
+        },
+        {
+            "type": "variantapi:custom_sheared_wool_feature",
+            "texture": "variantapi:textures/entity/sheep/overlay/fuzzy.png"
+        },
+        {
+            "type": "variantapi:horns_feature",
+            "texture": "variantapi:textures/entity/sheep/horn/horns_beige.png"
+        }
+    ]
+}
