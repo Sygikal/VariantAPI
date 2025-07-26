@@ -7,13 +7,17 @@
     "defaultRequire": 1
   },
   "client": [
+    "access.QuadrupedEntityModelAccessor",
     "entity.LivingEntityRendererMixin",
     "features.EyesFeatureRendererMixin",
     "features.SheepWoolFeatureRendererMixin"
   ],
   "mixins": [
     "compat.MobDifficultyMixin",
+    "entity.AnimalEntityMixin",
+    "entity.BulkChildCreationMixin",
     "entity.EntityMixin",
-    "entity.MobEntityMixin"
+    "entity.MobEntityMixin",
+    "entity.SpawnEggItemMixin"
   ]
 }
