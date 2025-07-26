@@ -18,6 +18,7 @@
     "entity.BulkChildCreationMixin",
     "entity.EntityMixin",
     "entity.MobEntityMixin",
-    "entity.SpawnEggItemMixin"
+    "item.NameTagItemMixin",
+    "item.SpawnEggItemMixin"
   ]
 }
