@@ -8,17 +8,20 @@ import dev.sygii.variantapi.network.packet.S2CRespondVariantPacket;
 import dev.sygii.variantapi.variants.Variant;
 import dev.sygii.variantapi.variants.VariantCondition;
 import dev.sygii.variantapi.variants.VariantFeature;
+import dev.sygii.variantapi.variants.condition.BreedingCondition;
 import dev.sygii.variantapi.variants.condition.L2HostilityLevelCondition;
 import dev.sygii.variantapi.variants.condition.MoonPhaseCondition;
 import dev.sygii.variantapi.variants.condition.PredicateCondition;
 import dev.sygii.variantapi.variants.feature.*;
 import net.fabricmc.api.ModInitializer;
 
+import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.loot.condition.LootCondition;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameterSet;
@@ -38,6 +41,7 @@ import net.minecraft.world.biome.Biome;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import oshi.util.tuples.Pair;
 
 import java.util.*;
 import java.util.function.Function;
@@ -59,7 +63,7 @@ public class VariantAPI implements ModInitializer {
 	public static final Map<EntityType<?>, Identifier> entityToId = new HashMap<>();
 
 	private static final Map<Identifier, Function<JsonObject, VariantCondition>> conditionCreators = new HashMap<>();
-	private static final Map<Identifier, Function<JsonObject, VariantFeature>> conditionFeatures = new HashMap<>();
+	private static final Map<Identifier, Function<JsonObject, VariantFeature>> featureCreators = new HashMap<>();
 
 	private static final Map<Identifier, Function<PacketByteBuf, VariantFeature>> featureDeserializers = new HashMap<>();
 
@@ -72,7 +76,7 @@ public class VariantAPI implements ModInitializer {
 	}
 
 	public static VariantFeature createFeature(Identifier type, JsonObject data) {
-		Function<JsonObject, VariantFeature> creator = conditionFeatures.get(type);
+		Function<JsonObject, VariantFeature> creator = featureCreators.get(type);
 		if (creator != null) {
 			return creator.apply(data);
 		}
@@ -94,18 +98,22 @@ public class VariantAPI implements ModInitializer {
 		conditionCreators.put(L2HostilityLevelCondition.ID, data -> new L2HostilityLevelCondition(data.get("min").getAsInt()));
 		conditionCreators.put(PredicateCondition.ID, data -> new PredicateCondition(Identifier.tryParse(data.get("predicate").getAsString())));
 		conditionCreators.put(MoonPhaseCondition.ID, data -> new MoonPhaseCondition(data.get("size").getAsInt()));
+		conditionCreators.put(BreedingCondition.ID, data -> new BreedingCondition(Identifier.tryParse(data.get("father").getAsString()), Identifier.tryParse(data.get("mother").getAsString())));
 
-		conditionFeatures.put(CustomEyesFeature.ID, data -> new CustomEyesFeature(Identifier.tryParse(data.get("texture").getAsString())));
-		conditionFeatures.put(CustomLightingFeature.ID, data -> new CustomLightingFeature(data.get("light").getAsInt()));
-		conditionFeatures.put(CustomRenderLayerFeature.ID, data -> new CustomRenderLayerFeature(CustomRenderLayerFeature.RenderLayers.valueOf(data.get("layer").getAsString())));
-		conditionFeatures.put(CustomWoolFeature.ID, data -> new CustomWoolFeature(Identifier.tryParse(data.get("texture").getAsString())));
-		conditionFeatures.put(CustomShearedWoolFeature.ID, data -> new CustomShearedWoolFeature(Identifier.tryParse(data.get("texture").getAsString())));
+		featureCreators.put(CustomEyesFeature.ID, data -> new CustomEyesFeature(Identifier.tryParse(data.get("texture").getAsString())));
+		featureCreators.put(CustomLightingFeature.ID, data -> new CustomLightingFeature(data.get("light").getAsInt()));
+		featureCreators.put(CustomRenderLayerFeature.ID, data -> new CustomRenderLayerFeature(CustomRenderLayerFeature.RenderLayers.valueOf(data.get("layer").getAsString())));
+		featureCreators.put(CustomWoolFeature.ID, data -> new CustomWoolFeature(Identifier.tryParse(data.get("texture").getAsString())));
+		featureCreators.put(CustomShearedWoolFeature.ID, data -> new CustomShearedWoolFeature(Identifier.tryParse(data.get("texture").getAsString())));
+		featureCreators.put(HornsFeature.ID, data -> new HornsFeature(Identifier.tryParse(data.get("texture").getAsString())));
 
 		featureDeserializers.put(CustomEyesFeature.ID, CustomEyesFeature::deserialize);
 		featureDeserializers.put(CustomLightingFeature.ID, CustomLightingFeature::deserialize);
 		featureDeserializers.put(CustomRenderLayerFeature.ID, CustomRenderLayerFeature::deserialize);
 		featureDeserializers.put(CustomWoolFeature.ID, CustomWoolFeature::deserialize);
 		featureDeserializers.put(CustomShearedWoolFeature.ID, CustomShearedWoolFeature::deserialize);
+		featureDeserializers.put(HornsFeature.ID, HornsFeature::deserialize);
+
 
 		/*ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register(VariantAPI.id("sync_variants"), (player, joined) -> {
 			ServerPlayNetworking.send(player, new S2CResetVariants());
@@ -136,8 +144,8 @@ public class VariantAPI implements ModInitializer {
 	}
 
 	public static void rerollVariants(MobEntity entity) {
-		((EntityAccess)entity).setVariant(VariantAPI.getRandomVariant(entity, entity.getType(), null, entity.getWorld(), entity.getRandom().nextLong(), entity.getWorld().getBiome(entity.getBlockPos()), entity.getWorld().getMoonSize()));
-		((EntityAccess)entity).setVariantOverlays(VariantAPI.getOverlays(entity, entity.getType(), null, entity.getWorld(), entity.getRandom().nextLong(), entity.getWorld().getBiome(entity.getBlockPos()), entity.getWorld().getMoonSize()));
+		((EntityAccess)entity).setVariant(VariantAPI.getRandomVariant(entity, entity.getType()));
+		((EntityAccess)entity).setVariantOverlays(VariantAPI.getOverlays(entity, entity.getType()));
 		VariantAPI.syncVariants(entity);
 	}
 
@@ -158,7 +166,7 @@ public class VariantAPI implements ModInitializer {
 		}
 	}
 
-	public static ArrayList<Variant> getSuitable(ArrayList<Variant> variantsToChooseFrom, MobEntity entity, EntityType<?> entityType, NbtCompound nbt, World world, @Nullable long randomSeed, @Nullable RegistryEntry<Biome> spawnBiome, /*@Nullable BreedingResultData breedingResultData,*/ @Nullable Float moonSize) {
+	public static ArrayList<Variant> getSuitable(ArrayList<Variant> variantsToChooseFrom, MobEntity entity) {
 		ArrayList<Variant> sorted = new ArrayList<Variant>();
 
 		for (Variant variant : variantsToChooseFrom) {
@@ -174,6 +182,12 @@ public class VariantAPI implements ModInitializer {
 				if (!condition.condition(entity)) {
 					i.remove();
 					continue;
+				}else {
+					if (condition.isExclusive()) {
+						ArrayList<Variant> exclusive = new ArrayList<Variant>();
+						exclusive.add(variant);
+						return exclusive;
+					}
 				}
 			}
 		}
@@ -181,21 +195,25 @@ public class VariantAPI implements ModInitializer {
 		return sorted;
 	}
 
-	public static Variant getRandomVariant(MobEntity entity, EntityType<?> entityType, NbtCompound nbt, World world, @Nullable long randomSeed, @Nullable RegistryEntry<Biome> spawnBiome, /*@Nullable BreedingResultData breedingResultData,*/ @Nullable Float moonSize) {
+	public static Variant getRandomVariant(MobEntity entity, EntityType<?> entityType) {
 		ArrayList<Variant> variants = variantMap.get(entityType);
 		if (variants == null || variants.isEmpty()) {
 			return getDefaultVariant();
 		}
-		ArrayList<Variant> sorted = getSuitable(variants, entity, entityType, nbt, world, randomSeed, spawnBiome, moonSize);
+		ArrayList<Variant> sorted = getSuitable(variants, entity);
+		if (((EntityAccess)entity).variantapi$getParents() != null && !((EntityAccess)entity).isBreedingHandled()) {
+			Pair<PassiveEntity, PassiveEntity> parents = ((EntityAccess)entity).variantapi$getParents();
+			return entity.getRandom().nextBoolean() ? ((EntityAccess)parents.getA()).getVariant() : ((EntityAccess)parents.getB()).getVariant();
+		}
 		return sort(sorted);
 	}
 
-	public static ArrayList<Variant> getOverlays(MobEntity entity, EntityType<?> entityType, NbtCompound nbt, World world, @Nullable long randomSeed, @Nullable RegistryEntry<Biome> spawnBiome, /*@Nullable BreedingResultData breedingResultData,*/ @Nullable Float moonSize) {
+	public static ArrayList<Variant> getOverlays(MobEntity entity, EntityType<?> entityType) {
 		ArrayList<Variant> variants = variantOverlayMap.get(entityType);
 		if (variants == null || variants.isEmpty()) {
 			return new ArrayList<>();
 		}
-		ArrayList<Variant> sorted = getSuitable(variants, entity, entityType, nbt, world, randomSeed, spawnBiome, moonSize);
+		ArrayList<Variant> sorted = getSuitable(variants, entity);
         return sorted;
 		//return new ArrayList<>();
 	}
