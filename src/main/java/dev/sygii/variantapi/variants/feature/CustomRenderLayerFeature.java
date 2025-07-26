@@ -24,23 +24,13 @@ public class CustomRenderLayerFeature extends VariantFeature {
         return new CustomRenderLayerFeature(RenderLayers.valueOf(buf.readString().toUpperCase()));
     }
 
-    public RenderLayer getLayer(Identifier id) {
-        return this.layer.layer.run(id);
+    public RenderLayers getLayer() {
+        return this.layer;
     }
 
     public enum RenderLayers {
-        ENTITY_CUTOUT_NO_CULL(RenderLayer::getEntityCutoutNoCull),
-        ENTITY_ALPHA(RenderLayer::getEntityAlpha),
-        EYES(RenderLayer::getEyes);
-
-        final RunningId layer;
-
-        RenderLayers(RunningId layer) {
-            this.layer = layer;
-        }
-    }
-
-    public interface RunningId {
-        RenderLayer run(Identifier id);
+        ENTITY_CUTOUT_NO_CULL,
+        ENTITY_ALPHA,
+        EYES;
     }
 }
