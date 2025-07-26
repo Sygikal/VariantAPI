@@ -12,32 +12,17 @@ import dev.sygii.variantapi.variants.condition.*;
 import dev.sygii.variantapi.variants.feature.*;
 import net.fabricmc.api.ModInitializer;
 
-import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.passive.PassiveEntity;
-import net.minecraft.loot.condition.LootCondition;
-import net.minecraft.loot.context.LootContext;
-import net.minecraft.loot.context.LootContextParameterSet;
-import net.minecraft.loot.context.LootContextParameters;
-import net.minecraft.loot.context.LootContextTypes;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.TagKey;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import oshi.util.tuples.Pair;
@@ -51,8 +36,6 @@ public class VariantAPI implements ModInitializer {
 
 	public static final String VARIANT_NBT_KEY = "variantapi:variantid";
 	public static final String VARIANT_OVERLAYS_NBT_KEY = "variantapi:variantoverlays";
-
-	//public static final Map<Identifier, ArrayList<Variant>> variantMap = new HashMap<>();
 
 	public static final Map<Identifier, VariantCondition> conditionRegistry = new HashMap<>();
 
@@ -198,7 +181,6 @@ public class VariantAPI implements ModInitializer {
 				}
 			}
 		}
-		//testLootCondition(context.getSource(), IdentifierArgumentType.getPredicateArgument(context, "predicate"))
 		return sorted;
 	}
 
@@ -223,17 +205,6 @@ public class VariantAPI implements ModInitializer {
 		ArrayList<Variant> sorted = getSuitable(variants, entity);
         return sorted;
 		//return new ArrayList<>();
-	}
-
-	private static boolean testLootCondition(ServerCommandSource source, LootCondition condition) {
-		ServerWorld serverWorld = source.getWorld();
-		LootContextParameterSet lootContextParameterSet = new LootContextParameterSet.Builder(serverWorld)
-				.add(LootContextParameters.ORIGIN, source.getPosition())
-				.addOptional(LootContextParameters.THIS_ENTITY, source.getEntity())
-				.build(LootContextTypes.COMMAND);
-		LootContext lootContext = new LootContext.Builder(lootContextParameterSet).build(null);
-		lootContext.markActive(LootContext.predicate(condition));
-		return condition.test(lootContext);
 	}
 
 	public static int getRandomNumber(int min, int max) {
