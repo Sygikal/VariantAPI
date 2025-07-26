@@ -1,7 +1,0 @@
-{
-  "condition": "minecraft:entity_properties",
-  "entity": "this",
-  "predicate": {
-    "nbt": "{\"cardinal_components\":{\"l2hostility:mob_difficulty\":{lv:6}}}"
-  }
-}
