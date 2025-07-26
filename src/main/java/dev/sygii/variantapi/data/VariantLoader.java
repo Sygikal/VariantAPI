@@ -7,6 +7,7 @@ import dev.sygii.variantapi.variants.Variant;
 import dev.sygii.variantapi.variants.VariantCondition;
 import dev.sygii.variantapi.variants.VariantFeature;
 import dev.sygii.variantapi.variants.condition.L2HostilityLevelCondition;
+import dev.sygii.variantapi.variants.condition.NameCondition;
 import dev.sygii.variantapi.variants.condition.PredicateCondition;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.entity.EntityType;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class VariantLoader implements SimpleSynchronousResourceReloadListener {
 
@@ -69,6 +71,23 @@ public class VariantLoader implements SimpleSynchronousResourceReloadListener {
                             VariantCondition condition = VariantAPI.createCondition(conditionType, elem.getAsJsonObject());
                             condition.setExclusive(exclusive);
                             variant.addCondition(condition);
+
+                            if (condition instanceof NameCondition nameCondition) {
+                                if (variant.overlay()) {
+                                    if (VariantAPI.entityToCustomNameToVariantOverlayMap.get(entityType) == null) {
+                                        VariantAPI.entityToCustomNameToVariantOverlayMap.put(entityType, new HashMap<String, ArrayList<Variant>>());
+                                    }
+                                    if (VariantAPI.entityToCustomNameToVariantOverlayMap.get(entityType).get(nameCondition.getName()) == null) {
+                                        VariantAPI.entityToCustomNameToVariantOverlayMap.get(entityType).put(nameCondition.getName(), new ArrayList<Variant>());
+                                    }
+                                    VariantAPI.entityToCustomNameToVariantOverlayMap.get(entityType).get(nameCondition.getName()).add(variant);
+                                }else {
+                                    if (VariantAPI.entityToCustomNameToVariantMap.get(entityType) == null) {
+                                        VariantAPI.entityToCustomNameToVariantMap.put(entityType, new HashMap<String, Variant>());
+                                    }
+                                    VariantAPI.entityToCustomNameToVariantMap.get(entityType).put(nameCondition.getName(), variant);
+                                }
+                            }
                         }
                     }
 
