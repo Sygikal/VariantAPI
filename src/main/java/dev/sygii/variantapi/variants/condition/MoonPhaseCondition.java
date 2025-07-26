@@ -15,17 +15,14 @@ import net.minecraft.util.Identifier;
 public class MoonPhaseCondition extends VariantCondition {
     public static Identifier ID = VariantAPI.id("moon_phase_condition");
 
-    private final int size;
-    public MoonPhaseCondition(int size) {
+    private final float size;
+    public MoonPhaseCondition(float size) {
         super(ID);
         this.size = size;
     }
 
     @Override
     public boolean condition(MobEntity entity) {
-        if (!(entity.getWorld().getMoonSize() > size)) {
-            return true;
-        }
-        return false;
+        return entity.getWorld().getMoonSize() > size;
     }
 }

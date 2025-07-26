@@ -99,12 +99,11 @@ public class VariantAPI implements ModInitializer {
 
 		conditionCreators.put(L2HostilityLevelCondition.ID, data -> new L2HostilityLevelCondition(data.get("min").getAsInt()));
 		conditionCreators.put(PredicateCondition.ID, data -> new PredicateCondition(Identifier.tryParse(data.get("predicate").getAsString())));
-		conditionCreators.put(MoonPhaseCondition.ID, data -> new MoonPhaseCondition(data.get("size").getAsInt()));
+		conditionCreators.put(MoonPhaseCondition.ID, data -> new MoonPhaseCondition(data.get("size").getAsFloat()));
 		conditionCreators.put(BreedingCondition.ID, data -> new BreedingCondition(Identifier.tryParse(data.get("father").getAsString()), Identifier.tryParse(data.get("mother").getAsString())));
 		conditionCreators.put(NameCondition.ID, data -> new NameCondition(data.get("name").getAsString()));
 		conditionCreators.put(BiomeCondition.ID, data -> new BiomeCondition(data.get("biome").getAsString()));
 		conditionCreators.put(AnyOfCondition.ID, data -> new AnyOfCondition(data.get("conditions").getAsJsonArray()));
-
 
 		featureCreators.put(CustomEyesFeature.ID, data -> new CustomEyesFeature(Identifier.tryParse(data.get("texture").getAsString())));
 		featureCreators.put(CustomLightingFeature.ID, data -> new CustomLightingFeature(data.get("light").getAsInt()));
