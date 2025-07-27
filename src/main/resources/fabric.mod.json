@@ -3,13 +3,13 @@
     "id": "variantapi",
     "version": "${version}",
     "name": "VariantAPI",
-    "description": "This is an example description! Tell everyone what your mod is about!",
+    "description": "API for adding variant skins and overlays to mobs",
     "authors": [
-        "Me!"
+        "Sygikal"
     ],
     "contact": {
         "homepage": "https://fabricmc.net/",
-        "sources": "https://github.com/FabricMC/fabric-example-mod"
+        "sources": "https://github.com/Sygikal/VariantAPI"
     },
     "license": "CC0-1.0",
     "icon": "assets/variantapi/icon.png",
