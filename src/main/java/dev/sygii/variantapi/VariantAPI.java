@@ -19,6 +19,8 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -78,6 +80,7 @@ public class VariantAPI implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		Registry.register(Registries.LOOT_CONDITION_TYPE, VariantLootCondition.ID, VariantLootCondition.VLC);
 		ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(new VariantLoader());
 
 		conditionCreators.put(L2HostilityLevelCondition.ID, data -> new L2HostilityLevelCondition(data.get("min").getAsInt()));
@@ -247,7 +250,7 @@ public class VariantAPI implements ModInitializer {
 	}
 
 	public static Variant getDefaultVariant() {
-		return new Variant(VariantAPI.id("default"), VariantAPI.id("textures/default"), 1, false);
+		return new Variant(VariantAPI.id("default"), VariantAPI.id("textures/default"), 1, false, true);
 	}
 
 	public static Identifier id(String string) {
