@@ -17,13 +17,15 @@ public class ClientPacketHandler {
             Identifier id = payload.getId();
             Identifier texture = payload.getTexture();
             boolean overlay = payload.overlay();
+            boolean defaultVariant = payload.defaultVariant();
+
             S2CRespondVariantPacket.VariantFeatureRecord features = payload.getFeatures();
 
             client.execute(() -> {
                 //VariantAPIClient.addVariant(Registries.ENTITY_TYPE.get(payload.entity(), new Variant()));
                 if (client.world != null) {
                     Entity entity = client.world.getEntityById(entityId);
-                    Variant variant = new Variant(id, texture, overlay);
+                    Variant variant = new Variant(id, texture, overlay, defaultVariant);
                     for (VariantFeature feature : features.variantFeatures()) {
                         variant.addFeature(feature);
                     }

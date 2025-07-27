@@ -48,17 +48,21 @@ public class VariantLoader implements SimpleSynchronousResourceReloadListener {
                 EntityType<?> entityType = Registries.ENTITY_TYPE.get(entityId);
                 if (entityType != null) {
                     Identifier texture = Identifier.tryParse(data.get("texture").getAsString());
+                    Identifier variantId = Identifier.of(id.getNamespace(), fileName);
 
                     boolean overlay = false;
                     if (data.has("overlay")) {
                         overlay = data.get("overlay").getAsBoolean();
                     }
 
-                    Identifier variantId = Identifier.of(id.getNamespace(), fileName);
+                    boolean defaultVariant = false;
+                    if (data.has("default")) {
+                        defaultVariant = data.get("default").getAsBoolean();
+                    }
 
                     int weight = data.get("weight").getAsInt();
 
-                    Variant variant = new Variant(variantId, texture, weight, overlay);
+                    Variant variant = new Variant(variantId, texture, weight, overlay, defaultVariant);
 
                     if (data.has("conditions")) {
                         for (JsonElement elem : data.getAsJsonArray("conditions")) {

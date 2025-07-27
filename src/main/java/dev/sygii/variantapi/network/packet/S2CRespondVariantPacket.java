@@ -17,6 +17,7 @@ public class S2CRespondVariantPacket implements FabricPacket {
     protected final Identifier id;
     protected final Identifier texture;
     protected final boolean overlay;
+    protected final boolean defaultVariant;
     protected final VariantFeatureRecord features;
 
     public static final PacketType<S2CRespondVariantPacket> TYPE = PacketType.create(
@@ -24,7 +25,7 @@ public class S2CRespondVariantPacket implements FabricPacket {
     );
 
     public S2CRespondVariantPacket(PacketByteBuf buf) {
-        this(buf.readInt(), buf.readIdentifier(), buf.readIdentifier(), buf.readBoolean(), VariantFeatureRecord.read(buf));
+        this(buf.readInt(), buf.readIdentifier(), buf.readIdentifier(), buf.readBoolean(), buf.readBoolean(), VariantFeatureRecord.read(buf));
     }
 
     public S2CRespondVariantPacket(int entityId, Variant variant) {
@@ -34,14 +35,16 @@ public class S2CRespondVariantPacket implements FabricPacket {
         this.id = variant.id();
         this.texture = variant.texture();
         this.overlay = variant.overlay();
+        this.defaultVariant = variant.isDefault();
         this.features = new VariantFeatureRecord(skillAttributeList);
     }
 
-    public S2CRespondVariantPacket(int entityId, Identifier id, Identifier texture, boolean overlay, VariantFeatureRecord features) {
+    public S2CRespondVariantPacket(int entityId, Identifier id, Identifier texture, boolean overlay, boolean defaultVariant, VariantFeatureRecord features) {
         this.entityId = entityId;
         this.id = id;
         this.texture = texture;
         this.overlay = overlay;
+        this.defaultVariant = defaultVariant;
         this.features = features;
     }
 
@@ -51,6 +54,7 @@ public class S2CRespondVariantPacket implements FabricPacket {
         buf.writeIdentifier(this.id);
         buf.writeIdentifier(this.texture);
         buf.writeBoolean(this.overlay);
+        buf.writeBoolean(this.defaultVariant);
         this.features.write(buf);
     }
 
@@ -77,6 +81,10 @@ public class S2CRespondVariantPacket implements FabricPacket {
 
     public boolean overlay() {
         return this.overlay;
+    }
+
+    public boolean defaultVariant() {
+        return this.defaultVariant;
     }
 
     public record VariantFeatureRecord(List<VariantFeature> variantFeatures) {

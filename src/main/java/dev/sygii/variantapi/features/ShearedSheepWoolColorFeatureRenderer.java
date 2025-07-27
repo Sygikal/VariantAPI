@@ -30,7 +30,7 @@ public class ShearedSheepWoolColorFeatureRenderer <T extends SheepEntity, M exte
         */
 
         Variant variant = ((EntityAccess)entity).getVariant();
-        if (!variant.id().equals(VariantAPI.getDefaultVariant().id())) {
+        if (!variant.isDefault()) {
             if (variant.getFeatures().containsKey(CustomShearedWoolFeature.ID)) {
                 float[] hs = SheepEntity.getRgbColor(entity.getColor());
 

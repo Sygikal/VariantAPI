@@ -15,6 +15,7 @@ import net.minecraft.client.render.entity.model.EntityModelPartNames;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.passive.CatEntity;
 import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.util.Identifier;
@@ -39,7 +40,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 	@Redirect(method = "getRenderLayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;getTexture(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/Identifier;"))
 	private Identifier init(LivingEntityRenderer instance, Entity entity) {
 		Variant variant = ((EntityAccess)entity).getVariant();
-		if (!variant.id().equals(VariantAPI.getDefaultVariant().id())) {
+		if (!variant.isDefault()) {
 			if (entity instanceof WolfEntity wolfEntity && variant.getFeatures().containsKey(WolfTexturesFeature.ID)) {
 				if (wolfEntity.isTamed()) {
 					return ((WolfTexturesFeature) variant.getFeature(WolfTexturesFeature.ID)).getTame();
@@ -55,7 +56,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 	@Inject(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/model/EntityModel;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;IIFFFF)V", shift = At.Shift.AFTER))
 	private void renderVariantOverlays(T livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
 		Variant variant = ((EntityAccess)livingEntity).getVariant();
-		if (!variant.id().equals(VariantAPI.getDefaultVariant().id())) {
+		if (!variant.isDefault()) {
 			if (livingEntity instanceof SheepEntity sheepEntity) {
 				if (variant.getFeatures().containsKey(CustomShearedWoolFeature.ID)) {
 					//matrixStack.push();

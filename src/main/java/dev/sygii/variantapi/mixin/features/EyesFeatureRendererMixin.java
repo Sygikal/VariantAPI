@@ -20,7 +20,7 @@ public class EyesFeatureRendererMixin {
 	private void mixinEyesFeatureTexture(Args args, @Local(argsOnly = true) Entity entity) {
 		if (entity != null) {
 			Variant variant = ((EntityAccess)entity).getVariant();
-			if (!variant.id().equals(VariantAPI.getDefaultVariant().id())) {
+			if (!variant.isDefault()) {
 				if (variant.getFeatures().containsKey(CustomEyesFeature.ID)) {
 					args.set(0, RenderLayer.getEyes(((CustomEyesFeature)variant.getFeature(CustomEyesFeature.ID)).getTexture()));
 				}

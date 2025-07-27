@@ -13,27 +13,25 @@ public class Variant {
     private final Identifier texture;
     private final int weight;
     private final boolean overlay;
-
-    private boolean customLighting;
-    private int light = 0;
+    private final boolean defaultVariant;
 
     private ArrayList<VariantCondition> conditions = new ArrayList<>();
     private Map<Identifier, VariantFeature> features = new HashMap<>();
 
-    public Variant(Identifier id, Identifier texture, boolean overlay) {
+    public Variant(Identifier id, Identifier texture, boolean overlay, boolean defaultVariant) {
         this.id = id;
         this.texture = texture;
         this.weight = 1;
         this.overlay = overlay;
+        this.defaultVariant = defaultVariant;
     }
 
-    public Variant(Identifier id, Identifier texture, int weight, boolean overlay/*, boolean customLighting, int light*/) {
+    public Variant(Identifier id, Identifier texture, int weight, boolean overlay, boolean defaultVariant) {
         this.id = id;
         this.texture = texture;
         this.weight = weight;
         this.overlay = overlay;
-        //this.customLighting = customLighting;
-        //this.light = light;
+        this.defaultVariant = defaultVariant;
     }
 
     public void addCondition(VariantCondition condition) {
@@ -70,5 +68,9 @@ public class Variant {
 
     public boolean overlay() {
         return this.overlay;
+    }
+
+    public boolean isDefault() {
+        return this.defaultVariant;
     }
 }
