@@ -29,14 +29,19 @@ public class S2CRespondVariantPacket implements FabricPacket {
     }
 
     public S2CRespondVariantPacket(int entityId, Variant variant) {
-        List<VariantFeature> skillAttributeList = new ArrayList<>(variant.getFeatures().values());
+        List<VariantFeature> featureList = new ArrayList<>();
+        for (VariantFeature feat : variant.getFeatures().values()) {
+            if (!feat.isServerOnly()) {
+                featureList.add(feat);
+            }
+        }
 
         this.entityId = entityId;
         this.id = variant.id();
         this.texture = variant.texture();
         this.overlay = variant.overlay();
         this.defaultVariant = variant.isDefault();
-        this.features = new VariantFeatureRecord(skillAttributeList);
+        this.features = new VariantFeatureRecord(featureList);
     }
 
     public S2CRespondVariantPacket(int entityId, Identifier id, Identifier texture, boolean overlay, boolean defaultVariant, VariantFeatureRecord features) {
