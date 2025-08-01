@@ -18,6 +18,8 @@ public class MobDifficultyMixin {
 
 	@Inject(method = "init",at = @At(value = "INVOKE", target = "Lkarashokleo/l2hostility/content/component/mob/MobDifficulty;sync()V"), remap = false)
 	private void mixinEyesFeatureTexture(RegionalDifficultyModifier difficulty, CallbackInfo ci) {
-		VariantAPI.rerollVariants(owner);
+		//VariantAPI.rerollVariants(owner);
+		VariantAPI.rollRandomVariants(owner);
+		VariantAPI.syncVariants(owner);
 	}
 }
