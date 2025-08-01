@@ -3,6 +3,7 @@ package dev.sygii.variantapi.mixin.entity;
 import dev.sygii.variantapi.VariantAPI;
 import dev.sygii.variantapi.acess.EntityAccess;
 import dev.sygii.variantapi.variants.Variant;
+import dev.sygii.variantapi.variants.feature.server.DaylightImmuneFeature;
 import net.minecraft.entity.EntityData;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.mob.MobEntity;
@@ -47,7 +48,6 @@ public abstract class MobEntityMixin {
 		if (nbt.contains(VariantAPI.VARIANT_OVERLAYS_NBT_KEY)) {
 			NbtList nbtList = nbt.getList(VariantAPI.VARIANT_OVERLAYS_NBT_KEY, NbtElement.STRING_TYPE);
 
-			//variantOverlays.clear();
 			((EntityAccess)entity).setVariantOverlays(new ArrayList<>());
 			for (int i = 0; i < nbtList.size(); i++) {
 				String variantString = nbtList.getString(i);
@@ -68,11 +68,38 @@ public abstract class MobEntityMixin {
 
 	@Inject(method = "initialize", at = @At("RETURN"))
 	protected void onInitialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt, CallbackInfoReturnable<EntityData> ci) {
-		((EntityAccess)entity).setVariant(VariantAPI.getRandomVariant(entity, entity.getType()));
-		((EntityAccess)entity).setVariantOverlays(VariantAPI.getOverlays(entity, entity.getType()));
+		//((EntityAccess)entity).setVariant(VariantAPI.getRandomVariant(entity));
+		//((EntityAccess)entity).setVariantOverlays(VariantAPI.getOverlays(entity));
+		VariantAPI.rollRandomVariants(entity);
+		VariantAPI.syncVariantAttributes(entity);
+		/*StatusEffect asd = Registries.STATUS_EFFECT.get(Identifier.of("minecraft","fire_resistance"));
+		int j;
+		Integer seconds = -1;
+		if (seconds != null) {
+			if (asd.isInstant()) {
+				j = seconds;
+			} else if (seconds == -1) {
+				j = -1;
+			} else {
+				j = seconds * 20;
+			}
+		} else if (asd.isInstant()) {
+			j = 1;
+		} else {
+			j = 600;
+		}
+		StatusEffectInstance statusEffectInstance = new StatusEffectInstance(asd, j, 1, false, false);
+		entity.addStatusEffect(statusEffectInstance);*/
 	}
 
 	//THIS IS CALLED ON BOTH CLIENT AND SERVER
 	@Inject(method = "tick", at = @At("RETURN"))
 	protected void onTick(CallbackInfo ci) { }
+
+	@Inject(method = "isAffectedByDaylight", at = @At("HEAD"), cancellable = true)
+	protected void onIsAffectedByDaylight(CallbackInfoReturnable<Boolean> cir) {
+		if (((EntityAccess)entity).getVariant().getFeatures().containsKey(DaylightImmuneFeature.ID)) {
+			cir.setReturnValue(false);
+		}
+	}
 }

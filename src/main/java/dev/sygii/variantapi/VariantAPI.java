@@ -10,12 +10,17 @@ import dev.sygii.variantapi.variants.VariantCondition;
 import dev.sygii.variantapi.variants.VariantFeature;
 import dev.sygii.variantapi.variants.condition.*;
 import dev.sygii.variantapi.variants.feature.*;
+import dev.sygii.variantapi.variants.feature.server.AttributesFeature;
+import dev.sygii.variantapi.variants.feature.server.DaylightImmuneFeature;
+import dev.sygii.variantapi.variants.feature.server.ExplosionRadiusFeature;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.network.PacketByteBuf;
@@ -98,6 +103,15 @@ public class VariantAPI implements ModInitializer {
 		featureCreators.put(CustomShearedWoolFeature.ID, data -> new CustomShearedWoolFeature(Identifier.tryParse(data.get("texture").getAsString())));
 		featureCreators.put(HornsFeature.ID, data -> new HornsFeature(Identifier.tryParse(data.get("texture").getAsString()), data.has("color") ? data.get("color").getAsInt() : -1));
 		featureCreators.put(WolfTexturesFeature.ID, data -> new WolfTexturesFeature(Identifier.tryParse(data.get("tame").getAsString()), Identifier.tryParse(data.get("angry").getAsString())));
+		featureCreators.put(DisplayNameFeature.ID, data -> new DisplayNameFeature(data.get("translate_key").getAsString()));
+
+
+		featureCreators.put(DaylightImmuneFeature.ID, data -> new DaylightImmuneFeature());
+		featureCreators.put(AttributesFeature.ID, data -> new AttributesFeature(data));
+		featureCreators.put(CustomSoundsFeature.ID, data -> new CustomSoundsFeature(data));
+		featureCreators.put(ExplosionRadiusFeature.ID, data -> new ExplosionRadiusFeature(data.get("radius").getAsFloat()));
+
+
 
 		featureDeserializers.put(CustomEyesFeature.ID, CustomEyesFeature::deserialize);
 		featureDeserializers.put(CustomLightingFeature.ID, CustomLightingFeature::deserialize);
@@ -106,7 +120,8 @@ public class VariantAPI implements ModInitializer {
 		featureDeserializers.put(CustomShearedWoolFeature.ID, CustomShearedWoolFeature::deserialize);
 		featureDeserializers.put(HornsFeature.ID, HornsFeature::deserialize);
 		featureDeserializers.put(WolfTexturesFeature.ID, WolfTexturesFeature::deserialize);
-
+		featureDeserializers.put(DisplayNameFeature.ID, DisplayNameFeature::deserialize);
+		//featureDeserializers.put(DaylightImmuneFeature.ID, DaylightImmuneFeature::deserialize);
 
 		/*ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register(VariantAPI.id("sync_variants"), (player, joined) -> {
 			ServerPlayNetworking.send(player, new S2CResetVariants());
@@ -136,14 +151,34 @@ public class VariantAPI implements ModInitializer {
 		return variants.get(idx);
 	}
 
-	public static void rerollVariants(MobEntity entity) {
-		((EntityAccess)entity).setVariant(VariantAPI.getRandomVariant(entity, entity.getType()));
-		((EntityAccess)entity).setVariantOverlays(VariantAPI.getOverlays(entity, entity.getType()));
+	public static void rollRandomVariants(MobEntity entity) {
+		((EntityAccess)entity).setVariant(VariantAPI.getRandomVariant(entity));
+		((EntityAccess)entity).setVariantOverlays(VariantAPI.getOverlays(entity));
+	}
+
+	/*public static void rerollVariants(MobEntity entity) {
 		VariantAPI.syncVariants(entity);
+	}*/
+
+	public static void syncVariantAttributes(MobEntity entity) {
+		if (((EntityAccess)entity).getVariant().getFeatures().containsKey(AttributesFeature.ID)) {
+			for (AttributesFeature.AttributeFeature attributeFeature : ((AttributesFeature)((EntityAccess)entity).getVariant().getFeatures().get(AttributesFeature.ID)).getAttributes()) {
+				EntityAttributeInstance attr = entity.getAttributeInstance(attributeFeature.getAttribute().value());
+				if (attr != null) {
+					Identifier identifier = ((EntityAccess)entity).getVariant().id();
+					UUID uid = UUID.nameUUIDFromBytes(identifier.toString().getBytes());
+					if (attr.getModifier(uid) != null && attr.hasModifier(attr.getModifier(uid))) {
+						attr.removeModifier(uid);
+					}
+					attr.addTemporaryModifier(new EntityAttributeModifier(uid, identifier.toString(), attributeFeature.getValue(), attributeFeature.getOperation()));
+				}
+			}
+		}
 	}
 
 	public static void syncVariants(MobEntity entity) {
 		MinecraftServer server = entity.getServer();
+		syncVariantAttributes(entity);
 		if (server != null) {
 			server.getPlayerManager().getPlayerList().forEach((player) -> {
 				sendVariantPacket(player, entity);
@@ -187,8 +222,8 @@ public class VariantAPI implements ModInitializer {
 		return sorted;
 	}
 
-	public static Variant getRandomVariant(MobEntity entity, EntityType<?> entityType) {
-		ArrayList<Variant> variants = variantMap.get(entityType);
+	public static Variant getRandomVariant(MobEntity entity) {
+		ArrayList<Variant> variants = variantMap.get(entity.getType());
 		if (variants == null || variants.isEmpty()) {
 			return getDefaultVariant();
 		}
@@ -200,8 +235,8 @@ public class VariantAPI implements ModInitializer {
 		return sort(sorted);
 	}
 
-	public static ArrayList<Variant> getOverlays(MobEntity entity, EntityType<?> entityType) {
-		ArrayList<Variant> variants = variantOverlayMap.get(entityType);
+	public static ArrayList<Variant> getOverlays(MobEntity entity) {
+		ArrayList<Variant> variants = variantOverlayMap.get(entity.getType());
 		if (variants == null || variants.isEmpty()) {
 			return new ArrayList<>();
 		}
