@@ -29,8 +29,9 @@ public abstract class AnimalEntityMixin {
 	private PassiveEntity onCreateChild(AnimalEntity instance, ServerWorld serverWorld, PassiveEntity passiveEntity, Operation<PassiveEntity> original) {
         PassiveEntity ent = original.call(instance, serverWorld, passiveEntity);
 		((EntityAccess)ent).variantapi$setParents(entity, passiveEntity);
-		((EntityAccess)ent).setVariant(VariantAPI.getRandomVariant(ent, ent.getType()));
-		((EntityAccess)ent).setVariantOverlays(VariantAPI.getOverlays(ent, ent.getType()));
+		//((EntityAccess)ent).setVariant(VariantAPI.getRandomVariant(ent));
+		//((EntityAccess)ent).setVariantOverlays(VariantAPI.getOverlays(ent));
+		VariantAPI.rollRandomVariants(ent);
 		return ent;
 	}
 }
