@@ -13,14 +13,17 @@ import dev.sygii.variantapi.variants.feature.*;
 import dev.sygii.variantapi.variants.feature.server.AttributesFeature;
 import dev.sygii.variantapi.variants.feature.server.DaylightImmuneFeature;
 import dev.sygii.variantapi.variants.feature.server.ExplosionRadiusFeature;
+import dev.sygii.variantapi.variants.feature.server.WaterImmuneFeature;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ai.pathing.PathNodeType;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.network.PacketByteBuf;
@@ -107,8 +110,10 @@ public class VariantAPI implements ModInitializer {
 
 
 		featureCreators.put(DaylightImmuneFeature.ID, data -> new DaylightImmuneFeature());
+		featureCreators.put(WaterImmuneFeature.ID, data -> new WaterImmuneFeature());
+
 		featureCreators.put(AttributesFeature.ID, data -> new AttributesFeature(data));
-		featureCreators.put(CustomSoundsFeature.ID, data -> new CustomSoundsFeature(data));
+		featureCreators.put(CustomSoundsFeature.ID, CustomSoundsFeature::new);
 		featureCreators.put(ExplosionRadiusFeature.ID, data -> new ExplosionRadiusFeature(data.get("radius").getAsFloat()));
 
 
@@ -121,6 +126,8 @@ public class VariantAPI implements ModInitializer {
 		featureDeserializers.put(HornsFeature.ID, HornsFeature::deserialize);
 		featureDeserializers.put(WolfTexturesFeature.ID, WolfTexturesFeature::deserialize);
 		featureDeserializers.put(DisplayNameFeature.ID, DisplayNameFeature::deserialize);
+		featureDeserializers.put(CustomSoundsFeature.ID, CustomSoundsFeature::deserialize);
+
 		//featureDeserializers.put(DaylightImmuneFeature.ID, DaylightImmuneFeature::deserialize);
 
 		/*ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register(VariantAPI.id("sync_variants"), (player, joined) -> {
@@ -179,6 +186,9 @@ public class VariantAPI implements ModInitializer {
 	public static void syncVariants(MobEntity entity) {
 		MinecraftServer server = entity.getServer();
 		syncVariantAttributes(entity);
+		/*if (entity instanceof EndermanEntity) {
+			entity.setPathfindingPenalty(PathNodeType.WATER, 8.0f);
+		}*/
 		if (server != null) {
 			server.getPlayerManager().getPlayerList().forEach((player) -> {
 				sendVariantPacket(player, entity);
