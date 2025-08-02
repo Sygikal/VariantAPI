@@ -13,7 +13,6 @@
     "features.SheepWoolFeatureRendererMixin"
   ],
   "mixins": [
-    "access.SoundEventMixin",
     "compat.MobDifficultyMixin",
     "entity.AnimalEntityMixin",
     "entity.BulkChildCreationMixin",
