@@ -17,8 +17,10 @@
     "compat.MobDifficultyMixin",
     "entity.AnimalEntityMixin",
     "entity.BulkChildCreationMixin",
-    "entity.CreeperEntityMixin",
+    "entity.creeper.CreeperEntityMixin",
+    "entity.enderman.EndermanEntityMixin",
     "entity.EntityMixin",
+    "entity.enderman.InnerEndermanEntityMixin",
     "entity.MobEntityMixin",
     "item.NameTagItemMixin",
     "item.SpawnEggItemMixin"
