@@ -9,6 +9,7 @@ import dev.sygii.variantapi.variants.Variant;
 import dev.sygii.variantapi.variants.feature.CustomSoundsFeature;
 import dev.sygii.variantapi.variants.feature.DisplayNameFeature;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.sound.SoundCategory;
@@ -92,9 +93,6 @@ public abstract class EntityMixin implements EntityAccess {
 		if (variant.getFeatures().containsKey(CustomSoundsFeature.ID)) {
 			if (((CustomSoundsFeature)variant.getFeatures().get(CustomSoundsFeature.ID)).getSoundMap().containsKey(sound.getId())) {
 				CustomSoundsFeature.CustomSound newSound = ((CustomSoundsFeature)variant.getFeatures().get(CustomSoundsFeature.ID)).getSoundMap().get(sound.getId());
-				//SoundEvent newSound = sound;
-				//((SoundEventAccess)newSound).setId(((CustomSoundsFeature)variant.getFeatures().get(CustomSoundsFeature.ID)).getSoundMap().get(sound.getId()));
-				//System.out.println(newSound.pitch() + " " + pitch);
 				original.call(instance, except, x, y, z, newSound.event(), category, newSound.volume() == 5.0f ? volume : newSound.volume(), newSound.pitch() == 5.0f ? pitch : newSound.pitch());
 			}
 		}else {
