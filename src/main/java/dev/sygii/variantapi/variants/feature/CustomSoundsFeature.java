@@ -3,21 +3,23 @@ package dev.sygii.variantapi.variants.feature;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import dev.sygii.variantapi.VariantAPI;
+import dev.sygii.variantapi.network.packet.S2CRespondVariantPacket;
 import dev.sygii.variantapi.variants.VariantFeature;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class CustomSoundsFeature extends VariantFeature {
     public static Identifier ID = VariantAPI.id("custom_sounds");
-    private final Map<Identifier, CustomSound> soundMap = new HashMap<>();
+    //private Map<Identifier, CustomSound> soundMap = new HashMap<>();
+    private CustomSoundRecord record;
 
     public CustomSoundsFeature(JsonObject data) {
-        super(ID, true);
+        super(ID);
 
+        Map<Identifier, CustomSound> soundMap = new HashMap<>();
         for (JsonElement elem : data.getAsJsonArray("sound_map")) {
             JsonObject obj = elem.getAsJsonObject();
 
@@ -34,26 +36,58 @@ public class CustomSoundsFeature extends VariantFeature {
                 pitch = obj.get("pitch").getAsFloat();
             }
 
-            this.soundMap.put(from, new CustomSound(SoundEvent.of(to), volume, pitch));
+            soundMap.put(from, new CustomSound(SoundEvent.of(to), volume, pitch));
         }
+
+        this.record = new CustomSoundRecord(soundMap);
+    }
+
+    public CustomSoundsFeature(CustomSoundRecord record) {
+        super(ID);
+
+        this.record = record;
     }
 
     public Map<Identifier, CustomSound> getSoundMap() {
-        return this.soundMap;
+        return this.record.sounds;
     }
 
     public record CustomSound(SoundEvent event, float volume, float pitch) {}
 
-    /*@Override
+    @Override
     public void serialize(PacketByteBuf buf) {
-        buf.writeString(this.displayName);
+        this.record.write(buf);
     }
 
     public static CustomSoundsFeature deserialize(PacketByteBuf buf) {
-        return new CustomSoundsFeature(buf.readString());
+        return new CustomSoundsFeature(CustomSoundRecord.read(buf));
     }
 
-    public Text getDisplayName() {
-        return Text.translatable(this.displayName);
-    }*/
+    public record CustomSoundRecord(Map<Identifier, CustomSound> sounds) {
+
+        public void write(PacketByteBuf buf) {
+            buf.writeInt(sounds().size());
+
+            for (Identifier id : sounds().keySet()) {
+                buf.writeIdentifier(id);
+                buf.writeIdentifier(sounds().get(id).event.getId());
+                buf.writeFloat(sounds().get(id).volume);
+                buf.writeFloat(sounds().get(id).pitch);
+            }
+        }
+
+        public static CustomSoundRecord read(PacketByteBuf buf) {
+            Map<Identifier, CustomSound> soundsMap = new HashMap<>();
+            int size = buf.readInt();
+            for (int i = 0; i < size; i++) {
+                Identifier id = buf.readIdentifier();
+                Identifier id2 = buf.readIdentifier();
+                float volume = buf.readFloat();
+                float pitch = buf.readFloat();
+                soundsMap.put(id, new CustomSound(SoundEvent.of(id2), volume, pitch));
+            }
+            return new CustomSoundRecord(soundsMap);
+        }
+
+    }
 }
