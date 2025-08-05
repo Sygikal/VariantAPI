@@ -4,7 +4,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.sygii.variantapi.acess.EntityAccess;
 import dev.sygii.variantapi.variants.feature.CustomSoundsFeature;
-import dev.sygii.variantapi.variants.feature.server.WaterImmuneFeature;
 import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.sound.SoundCategory;
@@ -49,7 +48,7 @@ public abstract class EndermanEntityMixin {
 		}
 	}
 
-	@Inject(
+	/*@Inject(
 			method = "hurtByWater",
 			at = @At(value = "RETURN"),
 			cancellable = true
@@ -58,5 +57,5 @@ public abstract class EndermanEntityMixin {
 		if ((((EntityAccess)entity).getVariant().getFeatures().containsKey(WaterImmuneFeature.ID))) {
 			cir.setReturnValue(false);
 		}
-	}
+	}*/
 }
