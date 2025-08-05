@@ -13,11 +13,12 @@ import dev.sygii.variantapi.variants.feature.*;
 import dev.sygii.variantapi.variants.feature.server.AttributesFeature;
 import dev.sygii.variantapi.variants.feature.server.DaylightImmuneFeature;
 import dev.sygii.variantapi.variants.feature.server.ExplosionRadiusFeature;
-import dev.sygii.variantapi.variants.feature.server.WaterImmuneFeature;
+import dev.sygii.variantapi.variants.feature.server.WaterAffinityFeature;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.pathing.PathNodeType;
@@ -110,7 +111,7 @@ public class VariantAPI implements ModInitializer {
 
 
 		featureCreators.put(DaylightImmuneFeature.ID, data -> new DaylightImmuneFeature());
-		featureCreators.put(WaterImmuneFeature.ID, data -> new WaterImmuneFeature());
+		featureCreators.put(WaterAffinityFeature.ID, data -> new WaterAffinityFeature(data.get("sensitive_to_water").getAsBoolean()));
 
 		featureCreators.put(AttributesFeature.ID, data -> new AttributesFeature(data));
 		featureCreators.put(CustomSoundsFeature.ID, CustomSoundsFeature::new);
