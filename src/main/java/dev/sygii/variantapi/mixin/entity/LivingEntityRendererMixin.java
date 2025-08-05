@@ -1,6 +1,6 @@
 package dev.sygii.variantapi.mixin.entity;
 
-import dev.sygii.variantapi.VariantAPI;
+import com.llamalad7.mixinextras.sugar.Local;
 import dev.sygii.variantapi.acess.EntityAccess;
 import dev.sygii.variantapi.mixin.access.QuadrupedEntityModelAccessor;
 import dev.sygii.variantapi.variants.Variant;
@@ -15,7 +15,6 @@ import net.minecraft.client.render.entity.model.EntityModelPartNames;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.passive.CatEntity;
 import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.util.Identifier;
@@ -25,7 +24,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Debug(export=true)
@@ -37,7 +36,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 	@Unique
 	private final ModelPart horns = getTexturedModelData().createModel();
 
-	@Redirect(method = "getRenderLayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;getTexture(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/Identifier;"))
+	/*@Redirect(method = "getRenderLayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;getTexture(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/Identifier;"))
 	private Identifier init(LivingEntityRenderer instance, Entity entity) {
 		Variant variant = ((EntityAccess)entity).getVariant();
 		if (!variant.isDefault()) {
@@ -51,6 +50,22 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 			return variant.texture();
 		}
 		return instance.getTexture(entity);
+	}*/
+
+	@ModifyVariable(method = "getRenderLayer", at = @At(value = "STORE", target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;getTexture(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/Identifier;"))
+	private Identifier init(Identifier value, @Local(argsOnly = true) T entity) {
+		Variant variant = ((EntityAccess)entity).getVariant();
+		if (!variant.isDefault()) {
+			if (entity instanceof WolfEntity wolfEntity && variant.getFeatures().containsKey(WolfTexturesFeature.ID)) {
+				if (wolfEntity.isTamed()) {
+					return ((WolfTexturesFeature) variant.getFeature(WolfTexturesFeature.ID)).getTame();
+				} else {
+					return wolfEntity.hasAngerTime() ? ((WolfTexturesFeature) variant.getFeature(WolfTexturesFeature.ID)).getAngry() : variant.texture();
+				}
+			}
+			return variant.texture();
+		}
+		return value;
 	}
 
 	@Inject(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/model/EntityModel;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;IIFFFF)V", shift = At.Shift.AFTER))
