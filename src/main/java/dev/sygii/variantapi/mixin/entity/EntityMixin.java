@@ -7,6 +7,8 @@ import dev.sygii.variantapi.acess.EntityAccess;
 import dev.sygii.variantapi.variants.Variant;
 import dev.sygii.variantapi.variants.feature.CustomSoundsFeature;
 import dev.sygii.variantapi.variants.feature.DisplayNameFeature;
+import dev.sygii.variantapi.variants.feature.server.DaylightImmuneFeature;
+import dev.sygii.variantapi.variants.feature.server.FireAffinityFeature;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -95,6 +97,13 @@ public abstract class EntityMixin implements EntityAccess {
 			}
 		}else {
 			original.call(instance, except, x, y, z, sound, category, volume, pitch);
+		}
+	}
+
+	@Inject(method = "isFireImmune", at = @At("HEAD"), cancellable = true)
+	protected void onIsFireImmune(CallbackInfoReturnable<Boolean> cir) {
+		if (variant.getFeatures().containsKey(FireAffinityFeature.ID)) {
+			cir.setReturnValue(((FireAffinityFeature)variant.getFeatures().get(FireAffinityFeature.ID)).isImmuneToFire());
 		}
 	}
 }
