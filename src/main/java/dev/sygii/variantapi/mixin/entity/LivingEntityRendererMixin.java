@@ -5,19 +5,27 @@ import dev.sygii.variantapi.acess.EntityAccess;
 import dev.sygii.variantapi.mixin.access.QuadrupedEntityModelAccessor;
 import dev.sygii.variantapi.variants.Variant;
 import dev.sygii.variantapi.variants.feature.*;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.model.*;
+import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.render.entity.model.EntityModelPartNames;
+import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.mob.SlimeEntity;
 import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.entity.passive.WolfEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
+import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -125,6 +133,29 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 			}
 			this.model.render(matrixStack, vertexConsumer, light, ((LivingEntityRenderer)(Object)this).getOverlay(livingEntity, ((LivingEntityRenderer)(Object)this).getAnimationCounter(livingEntity, g)), 1.0F, 1.0F, 1.0F, 1.0F);
 		});
+		/*if (livingEntity instanceof SlimeEntity slimeEntity) {
+			if (slimeEntity.isAlive() && !slimeEntity.isInvisible()) {
+				ItemStack stack = Items.TNT.getDefaultStack();
+				if (stack.isEmpty()) {
+					return;
+				}
+				if (!stack.isEmpty()) {
+					matrixStack.push();
+					matrixStack.multiply(new Quaternionf().rotateX(MathHelper.PI));
+					matrixStack.translate(0, -1, 0);
+					matrixStack.multiply(new Quaternionf().rotateX(MathHelper.PI / 2f));
+					matrixStack.multiply(new Quaternionf().rotateY(slimeEntity.getId() % 360));
+					matrixStack.translate(0, -(4 * 0.0626), 0);
+					matrixStack.translate(0, 0, -0.0626 / 4);
+					matrixStack.multiply(new Quaternionf().rotateY(MathHelper.PI / 2f));
+					MinecraftClient.getInstance()
+							.getItemRenderer()
+							.renderItem(stack, ModelTransformationMode.GROUND, i, OverlayTexture.DEFAULT_UV, matrixStack, vertexConsumerProvider, slimeEntity.getWorld(), (int) slimeEntity.getBlockPos()
+									.asLong());
+					matrixStack.pop();
+				}
+			}
+		}*/
 	}
 
 	@Unique
