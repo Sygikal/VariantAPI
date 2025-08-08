@@ -23,8 +23,11 @@ public class VariantAPIClient implements ClientModInitializer {
 		});
 		/*LivingEntityFeatureRendererRegistrationCallback.EVENT.register((entityType, entityRenderer, registrationHelper, context) -> {
 			//registrationHelper.register(new VariantOverlayFeatureRenderer<>((FeatureRendererContext)entityRenderer));
-			if (entityRenderer instanceof SheepEntityRenderer) {
+			/*if (entityRenderer instanceof SheepEntityRenderer) {
 				registrationHelper.register(new ShearedSheepWoolColorFeatureRenderer<>((FeatureRendererContext)entityRenderer));
+			}
+			if (entityRenderer instanceof SlimeEntityRenderer) {
+				registrationHelper.register(new SlimeItemFeatureRenderer<>((FeatureRendererContext)entityRenderer));
 			}
 		});*/
 
