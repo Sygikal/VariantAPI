@@ -10,10 +10,7 @@ import dev.sygii.variantapi.variants.VariantCondition;
 import dev.sygii.variantapi.variants.VariantFeature;
 import dev.sygii.variantapi.variants.condition.*;
 import dev.sygii.variantapi.variants.feature.*;
-import dev.sygii.variantapi.variants.feature.server.AttributesFeature;
-import dev.sygii.variantapi.variants.feature.server.DaylightImmuneFeature;
-import dev.sygii.variantapi.variants.feature.server.ExplosionRadiusFeature;
-import dev.sygii.variantapi.variants.feature.server.WaterAffinityFeature;
+import dev.sygii.variantapi.variants.feature.server.*;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -34,6 +31,7 @@ import net.minecraft.resource.ResourceType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import oshi.util.tuples.Pair;
@@ -87,6 +85,13 @@ public class VariantAPI implements ModInitializer {
 		throw new IllegalArgumentException("Unknown condition type: " + type);
 	}
 
+	public static void registerFeature(Identifier id, Function<JsonObject, VariantFeature> serializer, @Nullable Function<PacketByteBuf, VariantFeature> deserializer) {
+		featureCreators.put(id, serializer);
+		if (deserializer != null) {
+			featureDeserializers.put(id, deserializer);
+		}
+	}
+
 	@Override
 	public void onInitialize() {
 		Registry.register(Registries.LOOT_CONDITION_TYPE, VariantLootCondition.ID, VariantLootCondition.VLC);
@@ -108,17 +113,16 @@ public class VariantAPI implements ModInitializer {
 		featureCreators.put(HornsFeature.ID, data -> new HornsFeature(Identifier.tryParse(data.get("texture").getAsString()), data.has("color") ? data.get("color").getAsInt() : -1));
 		featureCreators.put(WolfTexturesFeature.ID, data -> new WolfTexturesFeature(Identifier.tryParse(data.get("tame").getAsString()), Identifier.tryParse(data.get("angry").getAsString())));
 		featureCreators.put(DisplayNameFeature.ID, data -> new DisplayNameFeature(data.get("translate_key").getAsString()));
-
+		featureCreators.put(CustomSoundsFeature.ID, CustomSoundsFeature::new);
 
 		featureCreators.put(DaylightImmuneFeature.ID, data -> new DaylightImmuneFeature());
 		featureCreators.put(WaterAffinityFeature.ID, data -> new WaterAffinityFeature(data.get("sensitive_to_water").getAsBoolean()));
-
-		featureCreators.put(AttributesFeature.ID, data -> new AttributesFeature(data));
-		featureCreators.put(CustomSoundsFeature.ID, CustomSoundsFeature::new);
+		featureCreators.put(AttributesFeature.ID, AttributesFeature::new);
 		featureCreators.put(ExplosionRadiusFeature.ID, data -> new ExplosionRadiusFeature(data.get("radius").getAsFloat()));
+		registerFeature(FireAffinityFeature.ID, data -> new FireAffinityFeature(data.get("immune_to_fire").getAsBoolean()), null);
+		registerFeature(CustomLootFeature.ID, data -> new CustomLootFeature(Identifier.tryParse(data.get("loot_table_id").getAsString())), null);
 
-
-
+		registerFeature(SlimeOverlayFeature.ID, data -> new SlimeOverlayFeature(Identifier.tryParse(data.get("texture").getAsString())), SlimeOverlayFeature::deserialize);
 		featureDeserializers.put(CustomEyesFeature.ID, CustomEyesFeature::deserialize);
 		featureDeserializers.put(CustomLightingFeature.ID, CustomLightingFeature::deserialize);
 		featureDeserializers.put(CustomRenderLayerFeature.ID, CustomRenderLayerFeature::deserialize);

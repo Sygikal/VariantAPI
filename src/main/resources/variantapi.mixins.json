@@ -10,7 +10,8 @@
     "access.QuadrupedEntityModelAccessor",
     "entity.LivingEntityRendererMixin",
     "features.EyesFeatureRendererMixin",
-    "features.SheepWoolFeatureRendererMixin"
+    "features.SheepWoolFeatureRendererMixin",
+    "features.SlimeOverlayFeatureRendererMixin"
   ],
   "mixins": [
     "compat.MobDifficultyMixin",
@@ -22,6 +23,7 @@
     "entity.creeper.CreeperEntityMixin",
     "entity.enderman.EndermanEntityMixin",
     "entity.enderman.InnerEndermanEntityMixin",
+    "entity.slime.SlimeEntityMixin",
     "item.NameTagItemMixin",
     "item.SpawnEggItemMixin"
   ]
