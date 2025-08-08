@@ -3,7 +3,6 @@ package dev.sygii.variantapi.variants.feature;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import dev.sygii.variantapi.VariantAPI;
-import dev.sygii.variantapi.network.packet.S2CRespondVariantPacket;
 import dev.sygii.variantapi.variants.VariantFeature;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.sound.SoundEvent;
