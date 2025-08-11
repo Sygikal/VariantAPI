@@ -5,27 +5,19 @@ import dev.sygii.variantapi.acess.EntityAccess;
 import dev.sygii.variantapi.mixin.access.QuadrupedEntityModelAccessor;
 import dev.sygii.variantapi.variants.Variant;
 import dev.sygii.variantapi.variants.feature.*;
-import net.minecraft.client.MinecraftClient;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.model.*;
-import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
-import net.minecraft.client.render.entity.model.EntityModel;
-import net.minecraft.client.render.entity.model.EntityModelPartNames;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
+import net.minecraft.client.render.entity.model.*;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.mob.SlimeEntity;
+import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.entity.passive.WolfEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
-import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,6 +26,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Debug(export=true)
 @Mixin(LivingEntityRenderer.class)
@@ -90,20 +90,31 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 					this.model.render(matrixStack, vertexConsumer, i, ((LivingEntityRenderer)(Object)this).getOverlay(livingEntity, ((LivingEntityRenderer)(Object)this).getAnimationCounter(livingEntity, g)), hs[0], hs[1], hs[2], 1.0f);
 					//matrixStack.pop();
 				}
-				if (variant.getFeatures().containsKey(HornsFeature.ID)) {
+			}
+			if (variant.getFeatures().containsKey(HornsFeature.ID)) {
+				ModelPart head = null;
+				if (this.model instanceof BipedEntityModel<?> biped) {
+					head = biped.getHead();
+				}else if (this.model instanceof QuadrupedEntityModel<?> quad) {
+					head = ((QuadrupedEntityModelAccessor)quad).getHead();
+				}else if (this.model instanceof SinglePartEntityModel<?> single) {
+					head = single.getPart().getChild(EntityModelPartNames.HEAD);
+				}
+
+				if (head != null) {
 					matrixStack.push();
-					ModelPart sheepHead = ((QuadrupedEntityModelAccessor)this.model).getHead();
-					horns.copyTransform(sheepHead);
+					horns.copyTransform(head);
 
 					RenderLayer HORN = RenderLayer.getEntityCutoutNoCull(((HornsFeature) variant.getFeature(HornsFeature.ID)).getTexture());
 					float[] colors = ((HornsFeature) variant.getFeature(HornsFeature.ID)).getColors();
 
-					if (sheepEntity.isBaby()) {
+					if (livingEntity.isBaby()) {
 						matrixStack.push();
 						matrixStack.translate(0.0f, 0.5f, 0.25f);
 					}
-					horns.render(matrixStack, vertexConsumerProvider.getBuffer(HORN), i, ((LivingEntityRenderer)(Object)this).getOverlay(livingEntity, ((LivingEntityRenderer)(Object)this).getAnimationCounter(livingEntity, g)), colors[0], colors[1], colors[2], 1.0f);
-					if (sheepEntity.isBaby()) {
+					//matrixStack.translate(0.0f, -0.2f, 0.0f);
+					horns.render(matrixStack, vertexConsumerProvider.getBuffer(HORN), i, ((LivingEntityRenderer) (Object) this).getOverlay(livingEntity, ((LivingEntityRenderer) (Object) this).getAnimationCounter(livingEntity, g)), colors[0], colors[1], colors[2], 1.0f);
+					if (livingEntity.isBaby()) {
 						matrixStack.pop();
 					}
 					matrixStack.pop();
@@ -157,6 +168,32 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 			}
 		}*/
 	}
+
+	// TODO: code will remain unused until i figure out how to unmap field names :cry:
+	/*
+
+	Field field = getHeadModel(this.model.getClass());
+					if (field != null) {
+						field.setAccessible(true);
+
+						ModelPart head = (ModelPart) field.get(this.model);
+	public Field getHeadModel(Class clazz) {
+		if (clazz != null) {
+			try {
+				String unmappedClassName = FabricLoader.getInstance().getMappingResolver().unmapClassName("intermediary", clazz.getName());
+				String namedFieldName = FabricLoader.getInstance().getMappingResolver().mapFieldName("named", unmappedClassName, "head", "Lnet/minecraft/class_630;");
+				String intermediaryFieldName = FabricLoader.getInstance().getMappingResolver().mapFieldName("intermediary", unmappedClassName, "head", "Lnet/minecraft/class_630;");
+				System.out.println(namedFieldName + " | " + intermediaryFieldName);
+				Field thisClass = clazz.getDeclaredField(intermediaryFieldName);
+				//System.out.println(thisClass);
+				return thisClass;
+			} catch (NoSuchFieldException e) {
+				//System.out.println("going higher! " + clazz.getSuperclass().getName());
+				return getHeadModel(clazz.getSuperclass());
+			}
+		}
+		return null;
+	}*/
 
 	@Unique
 	private static TexturedModelData getTexturedModelData() {
