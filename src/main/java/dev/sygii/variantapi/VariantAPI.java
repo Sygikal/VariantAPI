@@ -92,6 +92,10 @@ public class VariantAPI implements ModInitializer {
 		}
 	}
 
+	public static void registerCondition(Identifier id, Function<JsonObject, VariantCondition> serializer) {
+		conditionCreators.put(id, serializer);
+	}
+
 	@Override
 	public void onInitialize() {
 		Registry.register(Registries.LOOT_CONDITION_TYPE, VariantLootCondition.ID, VariantLootCondition.VLC);
@@ -104,6 +108,7 @@ public class VariantAPI implements ModInitializer {
 		conditionCreators.put(NameCondition.ID, data -> new NameCondition(data.get("name").getAsString()));
 		conditionCreators.put(BiomeCondition.ID, data -> new BiomeCondition(data.get("biome").getAsString()));
 		conditionCreators.put(AnyOfCondition.ID, data -> new AnyOfCondition(data.get("conditions").getAsJsonArray()));
+		registerCondition(StructureCondition.ID, data -> new StructureCondition(data.get("structure").getAsString()));
 
 		featureCreators.put(CustomEyesFeature.ID, data -> new CustomEyesFeature(Identifier.tryParse(data.get("texture").getAsString())));
 		featureCreators.put(CustomLightingFeature.ID, data -> new CustomLightingFeature(data.get("light").getAsInt()));
@@ -111,9 +116,7 @@ public class VariantAPI implements ModInitializer {
 		featureCreators.put(CustomWoolFeature.ID, data -> new CustomWoolFeature(Identifier.tryParse(data.get("texture").getAsString())));
 		featureCreators.put(CustomShearedWoolFeature.ID, data -> new CustomShearedWoolFeature(Identifier.tryParse(data.get("texture").getAsString())));
 		featureCreators.put(HornsFeature.ID, data -> new HornsFeature(Identifier.tryParse(data.get("texture").getAsString()), data.has("color") ? data.get("color").getAsInt() : -1));
-		featureCreators.put(WolfTexturesFeature.ID, data -> new WolfTexturesFeature(Identifier.tryParse(data.get("tame").getAsString()), Identifier.tryParse(data.get("angry").getAsString())));
-		featureCreators.put(DisplayNameFeature.ID, data -> new DisplayNameFeature(data.get("translate_key").getAsString()));
-		featureCreators.put(CustomSoundsFeature.ID, CustomSoundsFeature::new);
+		registerFeature(WolfTexturesFeature.ID, data -> new WolfTexturesFeature(Identifier.tryParse(data.get("tame").getAsString()), Identifier.tryParse(data.get("angry").getAsString())), WolfTexturesFeature::deserialize);
 
 		featureCreators.put(DaylightImmuneFeature.ID, data -> new DaylightImmuneFeature());
 		featureCreators.put(WaterAffinityFeature.ID, data -> new WaterAffinityFeature(data.get("sensitive_to_water").getAsBoolean()));
@@ -122,16 +125,15 @@ public class VariantAPI implements ModInitializer {
 		registerFeature(FireAffinityFeature.ID, data -> new FireAffinityFeature(data.get("immune_to_fire").getAsBoolean()), null);
 		registerFeature(CustomLootFeature.ID, data -> new CustomLootFeature(Identifier.tryParse(data.get("loot_table_id").getAsString())), null);
 
-		registerFeature(SlimeOverlayFeature.ID, data -> new SlimeOverlayFeature(Identifier.tryParse(data.get("texture").getAsString())), SlimeOverlayFeature::deserialize);
 		featureDeserializers.put(CustomEyesFeature.ID, CustomEyesFeature::deserialize);
 		featureDeserializers.put(CustomLightingFeature.ID, CustomLightingFeature::deserialize);
 		featureDeserializers.put(CustomRenderLayerFeature.ID, CustomRenderLayerFeature::deserialize);
 		featureDeserializers.put(CustomWoolFeature.ID, CustomWoolFeature::deserialize);
 		featureDeserializers.put(CustomShearedWoolFeature.ID, CustomShearedWoolFeature::deserialize);
 		featureDeserializers.put(HornsFeature.ID, HornsFeature::deserialize);
-		featureDeserializers.put(WolfTexturesFeature.ID, WolfTexturesFeature::deserialize);
-		featureDeserializers.put(DisplayNameFeature.ID, DisplayNameFeature::deserialize);
-		featureDeserializers.put(CustomSoundsFeature.ID, CustomSoundsFeature::deserialize);
+		registerFeature(CustomSoundsFeature.ID, CustomSoundsFeature::new, CustomSoundsFeature::deserialize);
+		registerFeature(SlimeOverlayFeature.ID, data -> new SlimeOverlayFeature(Identifier.tryParse(data.get("texture").getAsString())), SlimeOverlayFeature::deserialize);
+		registerFeature(DisplayNameFeature.ID, data -> new DisplayNameFeature(data.get("translate_key").getAsString()), DisplayNameFeature::deserialize);
 
 		//featureDeserializers.put(DaylightImmuneFeature.ID, DaylightImmuneFeature::deserialize);
 
