@@ -3,10 +3,10 @@ plugins {
 	id 'maven-publish'
 }
 
-version = project.mod_version
+def mcVersion = stonecutter.current.version
+version = project.mod_version + "+" + mcVersion
 group = project.maven_group
 
-def mcVersion = stonecutter.current.version
 
 base {
 	archivesName = project.archives_base_name
