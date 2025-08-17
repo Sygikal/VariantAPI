@@ -18,6 +18,8 @@ import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.ColorHelper;
+import net.minecraft.util.math.MathHelper;
 import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -75,20 +77,26 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 		}
 		return value;
 	}
-
+	//? if =1.20.1 {
 	@Inject(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/model/EntityModel;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;IIFFFF)V", shift = At.Shift.AFTER))
+	//?} else {
+	/*@Inject(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/model/EntityModel;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;III)V", shift = At.Shift.AFTER))
+	*///?}
 	private void renderVariantOverlays(T livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
 		Variant variant = ((EntityAccess)livingEntity).getVariant();
 		if (!variant.isDefault()) {
 			if (livingEntity instanceof SheepEntity sheepEntity) {
 				if (variant.getFeatures().containsKey(CustomShearedWoolFeature.ID)) {
-					//matrixStack.push();
-					float[] hs = SheepEntity.getRgbColor(sheepEntity.getColor());
-
 					RenderLayer FUR_OVERLAY = RenderLayer.getEntityCutoutNoCull(((CustomShearedWoolFeature) variant.getFeature(CustomShearedWoolFeature.ID)).getTexture());
 					VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(FUR_OVERLAY);
-					this.model.render(matrixStack, vertexConsumer, i, ((LivingEntityRenderer)(Object)this).getOverlay(livingEntity, ((LivingEntityRenderer)(Object)this).getAnimationCounter(livingEntity, g)), hs[0], hs[1], hs[2], 1.0f);
-					//matrixStack.pop();
+					//? if =1.20.1 {
+					float[] floats = SheepEntity.getRgbColor(sheepEntity.getColor());
+					int hs = -1;
+					//?} else {
+					/*float[] floats = {1.0f, 1.0f, 1.0f, 1.0f};
+					int hs = SheepEntity.getRgbColor(sheepEntity.getColor());
+					*///?}
+					renderModel(this.model, matrixStack, vertexConsumer, i, ((LivingEntityRenderer)(Object)this).getOverlay(livingEntity, ((LivingEntityRenderer)(Object)this).getAnimationCounter(livingEntity, g)), hs, floats[0], floats[1], floats[2], 1.0f);
 				}
 			}
 			if (variant.getFeatures().containsKey(HornsFeature.ID)) {
@@ -106,14 +114,14 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 					horns.copyTransform(head);
 
 					RenderLayer HORN = RenderLayer.getEntityCutoutNoCull(((HornsFeature) variant.getFeature(HornsFeature.ID)).getTexture());
-					float[] colors = ((HornsFeature) variant.getFeature(HornsFeature.ID)).getColors();
 
 					if (livingEntity.isBaby()) {
 						matrixStack.push();
 						matrixStack.translate(0.0f, 0.5f, 0.25f);
 					}
 					//matrixStack.translate(0.0f, -0.2f, 0.0f);
-					horns.render(matrixStack, vertexConsumerProvider.getBuffer(HORN), i, ((LivingEntityRenderer) (Object) this).getOverlay(livingEntity, ((LivingEntityRenderer) (Object) this).getAnimationCounter(livingEntity, g)), colors[0], colors[1], colors[2], 1.0f);
+					float[] colors = ((HornsFeature) variant.getFeature(HornsFeature.ID)).getColors();
+					renderModel(horns, matrixStack, vertexConsumerProvider.getBuffer(HORN), i, ((LivingEntityRenderer) (Object) this).getOverlay(livingEntity, ((LivingEntityRenderer) (Object) this).getAnimationCounter(livingEntity, g)), ((HornsFeature) variant.getFeature(HornsFeature.ID)).getColor(), colors[0], colors[1], colors[2], 1.0F);
 					if (livingEntity.isBaby()) {
 						matrixStack.pop();
 					}
@@ -142,7 +150,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 			if (k.getFeatures().containsKey(CustomLightingFeature.ID)) {
 				light = ((CustomLightingFeature)k.getFeature(CustomLightingFeature.ID)).getLight();
 			}
-			this.model.render(matrixStack, vertexConsumer, light, ((LivingEntityRenderer)(Object)this).getOverlay(livingEntity, ((LivingEntityRenderer)(Object)this).getAnimationCounter(livingEntity, g)), 1.0F, 1.0F, 1.0F, 1.0F);
+			renderModel(this.model, matrixStack, vertexConsumer, light, ((LivingEntityRenderer)(Object)this).getOverlay(livingEntity, ((LivingEntityRenderer)(Object)this).getAnimationCounter(livingEntity, g)), -1, 1.0F, 1.0F, 1.0F, 1.0F);
 		});
 		/*if (livingEntity instanceof SlimeEntity slimeEntity) {
 			if (slimeEntity.isAlive() && !slimeEntity.isInvisible()) {
@@ -167,6 +175,22 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 				}
 			}
 		}*/
+	}
+
+	public void renderModel(ModelPart model,  MatrixStack matrixStack, VertexConsumer vertexConsumer, int light, int overlay, int color, float color1, float color2, float color3, float color4) {
+		//? if =1.20.1 {
+		model.render(matrixStack, vertexConsumer, light, overlay, color1, color2, color3, color4);
+		 //?} else {
+		/*model.render(matrixStack, vertexConsumer, light, overlay, color);
+		*///?}
+	}
+
+	public void renderModel(M model,  MatrixStack matrixStack, VertexConsumer vertexConsumer, int light, int overlay, int color, float color1, float color2, float color3, float color4) {
+		//? if =1.20.1 {
+		model.render(matrixStack, vertexConsumer, light, overlay, color1, color2, color3, color4);
+		//?} else {
+		/*model.render(matrixStack, vertexConsumer, light, overlay, color);
+		*///?}
 	}
 
 	// TODO: code will remain unused until i figure out how to unmap field names :cry:

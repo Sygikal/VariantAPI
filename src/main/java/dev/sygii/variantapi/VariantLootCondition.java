@@ -8,14 +8,12 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.sygii.variantapi.acess.EntityAccess;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.loot.condition.KilledByPlayerLootCondition;
-import net.minecraft.loot.condition.LootCondition;
-import net.minecraft.loot.condition.LootConditionType;
-import net.minecraft.loot.condition.LootConditionTypes;
+import net.minecraft.loot.condition.*;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameter;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.util.Identifier;
+//? if =1.20.1
 import net.minecraft.util.JsonSerializer;
 import org.jetbrains.annotations.NotNull;
 import net.minecraft.util.JsonHelper;
@@ -24,8 +22,15 @@ import java.util.Set;
 
 public record VariantLootCondition(Identifier variant) implements LootCondition {
     public static final Identifier ID = VariantAPI.id("variant");
+
+    //? if =1.20.1 {
     public static final VLCSerializer SERIALIZER = new VLCSerializer();
     public static final LootConditionType VLC = new LootConditionType(SERIALIZER);
+    //?} else {
+    /*public static final MapCodec<VariantLootCondition> CODEC = RecordCodecBuilder.mapCodec((instance) -> instance.group(Identifier.CODEC.fieldOf("variant").forGetter(VariantLootCondition::variant)).apply(instance, VariantLootCondition::new));
+    public static final LootConditionType VLC = new LootConditionType(CODEC);
+    *///?}
+
 
     @Override
     public boolean test(LootContext lootContext)
@@ -56,6 +61,8 @@ public record VariantLootCondition(Identifier variant) implements LootCondition 
         return () -> new VariantLootCondition(variant);
     }
 
+    //? if =1.20.1 {
+    
     public static class VLCSerializer implements JsonSerializer<VariantLootCondition>
     {
         @Override
@@ -73,4 +80,5 @@ public record VariantLootCondition(Identifier variant) implements LootCondition 
             );
         }
     }
+    //?}
 }

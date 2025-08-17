@@ -32,11 +32,11 @@ public class ShearedSheepWoolColorFeatureRenderer <T extends SheepEntity, M exte
         Variant variant = ((EntityAccess)entity).getVariant();
         if (!variant.isDefault()) {
             if (variant.getFeatures().containsKey(CustomShearedWoolFeature.ID)) {
-                float[] hs = SheepEntity.getRgbColor(entity.getColor());
+                //float[] hs = SheepEntity.getRgbColor(entity.getColor());
 
                 RenderLayer FUR_OVERLAY = RenderLayer.getEntityCutoutNoCull(((CustomShearedWoolFeature)variant.getFeature(CustomShearedWoolFeature.ID)).getTexture());
                 VertexConsumer vertexConsumer = vertexConsumers.getBuffer(FUR_OVERLAY);
-                ((Model)this.getContextModel()).render(matrices, vertexConsumer, 0xF00000, OverlayTexture.DEFAULT_UV, hs[0], hs[1], hs[2], 1.0f);
+                //((Model)this.getContextModel()).render(matrices, vertexConsumer, 0xF00000, OverlayTexture.DEFAULT_UV, hs[0], hs[1], hs[2], 1.0f);
             }
         }
     };

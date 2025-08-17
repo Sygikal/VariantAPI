@@ -29,7 +29,11 @@ public class SlimeOverlayFeatureRendererMixin<T extends LivingEntity> {
 
     @Shadow @Final private EntityModel<T> model;
 
+    //? if =1.20.1 {
     @ModifyArgs(method = "render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;ILnet/minecraft/entity/LivingEntity;FFFFFF)V",at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/model/EntityModel;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;IIFFFF)V"))
+    //?} else {
+    /*@ModifyArgs(method = "render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;ILnet/minecraft/entity/LivingEntity;FFFFFF)V",at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/model/EntityModel;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;II)V"))
+    *///?}
     private void mixinEyesFeatureTexture(Args args, @Local(argsOnly = true) T entity, @Local(argsOnly = true) VertexConsumerProvider vertexConsumerProvider, @Local boolean bl) {
         if (entity != null) {
             Variant variant = ((EntityAccess)entity).getVariant();

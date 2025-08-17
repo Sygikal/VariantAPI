@@ -3,45 +3,52 @@ package dev.sygii.variantapi.network.packet;
 import dev.sygii.variantapi.VariantAPI;
 import dev.sygii.variantapi.variants.Variant;
 import dev.sygii.variantapi.variants.VariantFeature;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
-
-public class S2CRespondVariantPacket implements FabricPacket {
+//? if =1.20.1 {
+import net.fabricmc.fabric.api.networking.v1.FabricPacket;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
+public record S2CRespondVariantPacket(int entityId, Identifier id, Identifier texture, boolean overlay, boolean defaultVariant, VariantFeatureRecord features) implements FabricPacket {
+ //?} else {
+/*
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
+public record S2CRespondVariantPacket(int entityId, Identifier id, Identifier texture, boolean overlay, boolean defaultVariant, VariantFeatureRecord features) implements CustomPayload {
+*///?}
     public static final Identifier PACKET_ID = VariantAPI.id("sync_variant");
-    protected final int entityId;
-    protected final Identifier id;
-    protected final Identifier texture;
-    protected final boolean overlay;
-    protected final boolean defaultVariant;
-    protected final VariantFeatureRecord features;
 
+    //? if >=1.21.1 {
+    /*public static final CustomPayload.Id<S2CRespondVariantPacket> CODEC_ID = new CustomPayload.Id<>(PACKET_ID);
+
+    public static final PacketCodec<RegistryByteBuf, S2CRespondVariantPacket> PACKET_CODEC = PacketCodec.of(
+            (value, buf) -> {
+                buf.writeInt(value.entityId);
+                buf.writeIdentifier(value.id);
+                buf.writeIdentifier(value.texture);
+                buf.writeBoolean(value.overlay);
+                buf.writeBoolean(value.defaultVariant);
+                value.features.write(buf);
+            },
+            buf -> new S2CRespondVariantPacket(buf.readInt(), buf.readIdentifier(), buf.readIdentifier(), buf.readBoolean(), buf.readBoolean(), VariantFeatureRecord.read(buf)));
+
+
+    @Override
+    public Id<? extends CustomPayload> getId() {
+        return CODEC_ID;
+    }
+    *///?}
+
+    //? if =1.20.1 {
     public static final PacketType<S2CRespondVariantPacket> TYPE = PacketType.create(
             PACKET_ID, S2CRespondVariantPacket::new
     );
 
     public S2CRespondVariantPacket(PacketByteBuf buf) {
         this(buf.readInt(), buf.readIdentifier(), buf.readIdentifier(), buf.readBoolean(), buf.readBoolean(), VariantFeatureRecord.read(buf));
-    }
-
-    public S2CRespondVariantPacket(int entityId, Variant variant) {
-        List<VariantFeature> featureList = new ArrayList<>();
-        for (VariantFeature feat : variant.getFeatures().values()) {
-            if (!feat.isServerOnly()) {
-                featureList.add(feat);
-            }
-        }
-
-        this.entityId = entityId;
-        this.id = variant.id();
-        this.texture = variant.texture();
-        this.overlay = variant.overlay();
-        this.defaultVariant = variant.isDefault();
-        this.features = new VariantFeatureRecord(featureList);
     }
 
     public S2CRespondVariantPacket(int entityId, Identifier id, Identifier texture, boolean overlay, boolean defaultVariant, VariantFeatureRecord features) {
@@ -91,6 +98,7 @@ public class S2CRespondVariantPacket implements FabricPacket {
     public boolean defaultVariant() {
         return this.defaultVariant;
     }
+    //?}
 
     public record VariantFeatureRecord(List<VariantFeature> variantFeatures) {
 

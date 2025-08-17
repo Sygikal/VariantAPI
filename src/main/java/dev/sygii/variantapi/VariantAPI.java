@@ -170,21 +170,29 @@ public class VariantAPI implements ModInitializer {
 		((EntityAccess)entity).setVariantOverlays(VariantAPI.getOverlays(entity));
 	}
 
-	/*public static void rerollVariants(MobEntity entity) {
-		VariantAPI.syncVariants(entity);
-	}*/
-
 	public static void syncVariantAttributes(MobEntity entity) {
 		if (((EntityAccess)entity).getVariant().getFeatures().containsKey(AttributesFeature.ID)) {
 			for (AttributesFeature.AttributeFeature attributeFeature : ((AttributesFeature)((EntityAccess)entity).getVariant().getFeatures().get(AttributesFeature.ID)).getAttributes()) {
+				//? if =1.20.1 {
 				EntityAttributeInstance attr = entity.getAttributeInstance(attributeFeature.getAttribute().value());
+				//?} else {
+				/*EntityAttributeInstance attr = entity.getAttributeInstance(attributeFeature.getAttribute());
+				*///?}
 				if (attr != null) {
 					Identifier identifier = ((EntityAccess)entity).getVariant().id();
+					//? if =1.20.1 {
+					
 					UUID uid = UUID.nameUUIDFromBytes(identifier.toString().getBytes());
 					if (attr.getModifier(uid) != null && attr.hasModifier(attr.getModifier(uid))) {
 						attr.removeModifier(uid);
 					}
 					attr.addTemporaryModifier(new EntityAttributeModifier(uid, identifier.toString(), attributeFeature.getValue(), attributeFeature.getOperation()));
+					 //?} else {
+					/*if (attr.getModifier(identifier) != null && attr.hasModifier(identifier)) {
+						attr.removeModifier(identifier);
+					}
+					attr.addTemporaryModifier(new EntityAttributeModifier(identifier, attributeFeature.getValue(), attributeFeature.getOperation()));
+					*///?}
 				}
 			}
 		}
@@ -204,10 +212,18 @@ public class VariantAPI implements ModInitializer {
 	}
 
 	public static void sendVariantPacket(ServerPlayerEntity player, Entity entity) {
-		ServerPlayNetworking.send(player, new S2CRespondVariantPacket(entity.getId(), ((EntityAccess)entity).getVariant()));
+		Variant variant = ((EntityAccess)entity).getVariant();
+		List<VariantFeature> featureList = new ArrayList<>();
+		for (VariantFeature feat : variant.getFeatures().values()) {
+			if (!feat.isServerOnly()) {
+				featureList.add(feat);
+			}
+		}
 
-		for (Variant variant : ((EntityAccess)entity).getVariantOverlays()) {
-			ServerPlayNetworking.send(player, new S2CRespondVariantPacket(entity.getId(), variant));
+		ServerPlayNetworking.send(player, new S2CRespondVariantPacket(entity.getId(), variant.id(), variant.texture(), variant.overlay(), variant.isDefault(), new S2CRespondVariantPacket.VariantFeatureRecord(featureList)));
+
+		for (Variant overlay : ((EntityAccess)entity).getVariantOverlays()) {
+			ServerPlayNetworking.send(player, new S2CRespondVariantPacket(entity.getId(), overlay.id(), overlay.texture(), overlay.overlay(), overlay.isDefault(), new S2CRespondVariantPacket.VariantFeatureRecord(featureList)));
 		}
 	}
 

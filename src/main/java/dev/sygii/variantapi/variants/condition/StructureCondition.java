@@ -35,7 +35,11 @@ public class StructureCondition extends VariantCondition {
             if (structureTag != null) {
                 return serverWorld.getStructureAccessor().getStructureContaining(entity.getBlockPos(), structureTag).hasChildren();
             } else {
+                //? if =1.20.1 {
                 return serverWorld.getStructureAccessor().getStructureContaining(entity.getBlockPos(), RegistryKey.of(RegistryKeys.STRUCTURE, structure)).hasChildren();
+                //?} else {
+                /*return false;
+                *///?}
             }
         }
         return false;

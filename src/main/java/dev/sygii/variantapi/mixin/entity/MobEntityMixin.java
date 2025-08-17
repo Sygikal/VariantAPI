@@ -40,8 +40,8 @@ public abstract class MobEntityMixin {
 	@Inject(method = "readCustomDataFromNbt", at = @At("RETURN"))
 	protected void onReadCustomDataFromNbt(NbtCompound nbt, CallbackInfo ci) {
 		if (!nbt.getString(VariantAPI.VARIANT_NBT_KEY).isEmpty()/* && !nbt.getString(VariantAPI.VARIANT_NBT_KEY).equals(VariantAPI.getDefaultVariant().id().toString())*/) {
-			((EntityAccess)entity).setVariant(VariantAPI.getVariant(entity.getType(), new Identifier(nbt.getString(VariantAPI.VARIANT_NBT_KEY))));
-		} /*else {
+			((EntityAccess)entity).setVariant(VariantAPI.getVariant(entity.getType(), Identifier.tryParse(nbt.getString(VariantAPI.VARIANT_NBT_KEY))));
+		} /*else { "attachmentsapi:attachments":[{"custom:synced":["default"]}]
 			((EntityAccess)entity).setVariant(VariantAPI.getRandomVariant(entity, entity.getType(), nbt, entity.getWorld(), entity.getRandom().nextLong(), entity.getWorld().getBiome(entity.getBlockPos()), entity.getWorld().getMoonSize()));
 		}*/
 
@@ -67,7 +67,11 @@ public abstract class MobEntityMixin {
 	}
 
 	@Inject(method = "initialize", at = @At("RETURN"))
+	//? if =1.20.1 {
 	protected void onInitialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt, CallbackInfoReturnable<EntityData> ci) {
+	//?} else {
+	/*protected void onInitialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, CallbackInfoReturnable<EntityData> ci) {
+	*///?}
 		//((EntityAccess)entity).setVariant(VariantAPI.getRandomVariant(entity));
 		//((EntityAccess)entity).setVariantOverlays(VariantAPI.getOverlays(entity));
 		VariantAPI.rollRandomVariants(entity);
