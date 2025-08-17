@@ -109,6 +109,9 @@ public class VariantAPI implements ModInitializer {
 		conditionCreators.put(BiomeCondition.ID, data -> new BiomeCondition(data.get("biome").getAsString()));
 		conditionCreators.put(AnyOfCondition.ID, data -> new AnyOfCondition(data.get("conditions").getAsJsonArray()));
 		registerCondition(StructureCondition.ID, data -> new StructureCondition(data.get("structure").getAsString()));
+		registerCondition(AllOfCondition.ID, data -> new AllOfCondition(data.get("conditions").getAsJsonArray()));
+		registerCondition(InvertedCondition.ID, data -> new InvertedCondition(data.get("condition").getAsJsonObject()));
+
 
 		featureCreators.put(CustomEyesFeature.ID, data -> new CustomEyesFeature(Identifier.tryParse(data.get("texture").getAsString())));
 		featureCreators.put(CustomLightingFeature.ID, data -> new CustomLightingFeature(data.get("light").getAsInt()));
