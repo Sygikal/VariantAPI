@@ -46,8 +46,21 @@ public class AttributesFeature extends VariantFeature {
                 }*/
                 float value = obj.get("value").getAsFloat();
 
-
-                EntityAttributeModifier.Operation operation = EntityAttributeModifier.Operation.valueOf(obj.get("operation").getAsString().toUpperCase());
+                String opString = obj.get("operation").getAsString().toUpperCase();
+                //? if >=1.21.1 {
+                /*switch (opString) {
+                    case "ADDITION":
+                        opString = "ADD_VALUE";
+                        break;
+                    case "MULTIPLY_BASE":
+                        opString = "ADD_MULTIPLIED_BASE";
+                        break;
+                    case "MULTIPLY_TOTAL":
+                        opString = "ADD_MULTIPLIED_TOTAL";
+                        break;
+                }
+                *///?}
+                EntityAttributeModifier.Operation operation = EntityAttributeModifier.Operation.valueOf(opString);
                 this.attributes.add(new AttributeFeature(attribute, value, operation));
             } else {
                 VariantAPI.LOGGER.warn("Attribute {} does not exist", obj.get("type").getAsString());
